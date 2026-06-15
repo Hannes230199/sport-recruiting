@@ -1,0 +1,5 @@
+Diese Datei wird nicht mehr verwendet und kann gelöscht werden.
+
+Next.js 14 unterstützt `next.config.ts` nicht - die Konfiguration wurde
+nach `next.config.mjs` verschoben. Diese Datei konnte im Sandbox-Dateisystem
+nicht gelöscht werden, hat aber keine Funktion mehr.
