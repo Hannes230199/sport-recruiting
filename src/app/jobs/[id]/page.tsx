@@ -98,42 +98,51 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </div>
         )}
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          {!user ? (
-            <Link
-              href={`/login?next=/jobs/${job.id}`}
+        <div className="mt-8 space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Primary: always goes to external posting */}
+            <a
+              href={job.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
             >
-              Anmelden, um dich zu bewerben
-            </Link>
-          ) : existingApplication ? (
-            <span className="rounded-xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-700">
-              Bewerbung gesendet · Status: {APPLICATION_STATUS_LABELS[existingApplication.status]}
-            </span>
-          ) : (
-            <form action={applyToJob.bind(null, job.id)}>
-              <button
-                type="submit"
-                className="rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
+              Zur Stellenanzeige ↗
+            </a>
+
+            {/* Secondary: tracking CTA */}
+            {!user ? (
+              <Link
+                href={`/login?next=/jobs/${job.id}`}
+                className="rounded-xl border border-brand-200 px-6 py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
               >
-                Jetzt bewerben
-              </button>
-            </form>
-          )}
-          <a
-            href={job.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-          >
-            Original-Anzeige ↗
-          </a>
-        </div>
-        {user && !existingApplication && (
-          <p className="mt-2 text-xs text-slate-400">
-            Beim Bewerben wird dein aktuelles Profil als Bewerbung gespeichert.
+                Anmelden & tracken
+              </Link>
+            ) : existingApplication ? (
+              <Link
+                href="/bewerbungen"
+                className="inline-flex items-center gap-2 rounded-xl border border-brand-100 bg-brand-50 px-6 py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100"
+              >
+                <span className="h-2 w-2 rounded-full bg-brand-500" />
+                Getrackt · {APPLICATION_STATUS_LABELS[existingApplication.status]}
+              </Link>
+            ) : (
+              <form action={applyToJob.bind(null, job.id)}>
+                <button
+                  type="submit"
+                  className="rounded-xl border border-brand-200 px-6 py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
+                >
+                  + Bewerbung tracken
+                </button>
+              </form>
+            )}
+          </div>
+          <p className="text-xs text-slate-400">
+            Die Bewerbung läuft direkt über die externe Plattform.
+            {user && !existingApplication && ' Mit „Bewerbung tracken“ speicherst du sie hier zur Übersicht.'}
+            {existingApplication && " Du verfolgst diese Bewerbung bereits in deiner Übersicht."}
           </p>
-        )}
+        </div>
       </article>
 
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { APPLICATION_STATUS_LABELS, ApplicationStatus } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { getApplications } from "@/lib/data/applications";
+import { withdrawApplicationAction } from "./actions";
 
 const STATUS_STYLES: Record<ApplicationStatus, string> = {
   draft:     "bg-slate-100 text-slate-600",
@@ -24,6 +25,9 @@ const STATUS_DOT: Record<ApplicationStatus, string> = {
   withdrawn: "bg-slate-300",
 };
 
+const STATUS_OPTIONS = Object.entries(APPLICATION_STATUS_LABELS) as [ApplicationStatus, string][];
+const VALID_STATUSES = new Set<ApplicationStatus>(STATUS_OPTIONS.map(([s]) => s));
+
 function formatDate(iso: string | null): string {
   if (!iso) return "–";
   const date = new Date(iso);
@@ -31,16 +35,30 @@ function formatDate(iso: string | null): string {
   return date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-export default async function BewerbungenPage() {
+interface BewerbungenPageProps {
+  searchParams: Promise<{ status?: string }>;
+}
+
+export default async function BewerbungenPage({ searchParams }: BewerbungenPageProps) {
+  const { status: statusRaw } = await searchParams;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
   if (!user) redirect("/login?next=/bewerbungen");
 
-  const applications = await getApplications(supabase, user.id);
+  const allApplications = await getApplications(supabase, user.id);
 
-  const counts = applications.reduce<Record<ApplicationStatus, number>>((acc, app) => {
+  const statusFilter =
+    statusRaw && VALID_STATUSES.has(statusRaw as ApplicationStatus)
+      ? (statusRaw as ApplicationStatus)
+      : undefined;
+
+  const applications = statusFilter
+    ? allApplications.filter((a) => a.status === statusFilter)
+    : allApplications;
+
+  const counts = allApplications.reduce<Record<ApplicationStatus, number>>((acc, app) => {
     acc[app.status] = (acc[app.status] ?? 0) + 1;
     return acc;
   }, {} as Record<ApplicationStatus, number>);
@@ -50,90 +68,145 @@ export default async function BewerbungenPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Meine Bewerbungen</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Übersicht über alle Bewerbungen und ihren aktuellen Status.
+          Übersicht über alle Bewerbungen, die du hier trackst.
         </p>
       </div>
 
-      {/* Status overview cards */}
+      {/* Status summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-        {(Object.entries(APPLICATION_STATUS_LABELS) as [ApplicationStatus, string][]).map(
-          ([status, label]) => (
-            <div
-              key={status}
-              className="rounded-2xl border border-brand-100 bg-white p-4 text-center shadow-sm"
-            >
-              <p className="text-2xl font-extrabold text-slate-900">{counts[status] ?? 0}</p>
-              <p className="mt-1 flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
-                <span className={`inline-block h-1.5 w-1.5 rounded-full ${STATUS_DOT[status]}`} />
-                {label}
-              </p>
-            </div>
-          )
-        )}
+        {STATUS_OPTIONS.map(([status, label]) => (
+          <div
+            key={status}
+            className="rounded-2xl border border-brand-100 bg-white p-4 text-center shadow-sm"
+          >
+            <p className="text-2xl font-extrabold text-slate-900">{counts[status] ?? 0}</p>
+            <p className="mt-1 flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
+              <span className={`inline-block h-1.5 w-1.5 rounded-full ${STATUS_DOT[status]}`} />
+              {label}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-100 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400">
-            <tr>
-              <th className="px-5 py-3">Job</th>
-              <th className="px-5 py-3">Unternehmen</th>
-              <th className="px-5 py-3">Match</th>
-              <th className="px-5 py-3">Status</th>
-              <th className="px-5 py-3">Datum</th>
-              <th className="px-5 py-3">Notizen</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {applications.map((app) => (
-              <tr key={app.id} className="hover:bg-brand-50/30 transition-colors">
-                <td className="px-5 py-3.5 font-medium text-slate-900">
+      {/* Filter pills */}
+      <div className="flex flex-wrap gap-2 text-sm">
+        <Link
+          href="/bewerbungen"
+          className={`rounded-full px-4 py-1.5 font-semibold transition-colors ${
+            !statusFilter
+              ? "bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-sm"
+              : "border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-700"
+          }`}
+        >
+          Alle ({allApplications.length})
+        </Link>
+        {STATUS_OPTIONS.map(([status, label]) => (
+          <Link
+            key={status}
+            href={`/bewerbungen?status=${status}`}
+            className={`rounded-full px-4 py-1.5 font-semibold transition-colors ${
+              statusFilter === status
+                ? "bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-sm"
+                : "border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-700"
+            }`}
+          >
+            {label} ({counts[status] ?? 0})
+          </Link>
+        ))}
+      </div>
+
+      {/* Application cards */}
+      {applications.length === 0 ? (
+        <div className="rounded-2xl border border-brand-100 bg-white p-10 text-center shadow-sm">
+          <p className="text-3xl">📋</p>
+          <p className="mt-3 font-semibold text-slate-700">
+            {statusFilter
+              ? `Keine Bewerbungen mit Status „${APPLICATION_STATUS_LABELS[statusFilter]}"`
+              : "Noch keine Bewerbungen getrackt."}
+          </p>
+          {!statusFilter && (
+            <p className="mt-1 text-sm text-slate-500">
+              Öffne eine Stellenanzeige und klicke auf „Bewerbung tracken", um sie hier zu speichern.
+            </p>
+          )}
+          <Link
+            href="/jobs"
+            className="mt-4 inline-block rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
+          >
+            Jobs durchsuchen →
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {applications.map((app) => (
+            <div
+              key={app.id}
+              className="flex flex-col gap-4 rounded-2xl border border-brand-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row sm:items-center"
+            >
+              {/* Left: job info */}
+              <div className="flex-1 space-y-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
                   {app.job ? (
                     <Link
                       href={`/jobs/${app.job.id}`}
-                      className="hover:text-brand-700 hover:underline"
+                      className="font-semibold text-slate-900 hover:text-brand-700 hover:underline"
                     >
                       {app.job.title}
                     </Link>
                   ) : (
-                    "Unbekannter Job"
+                    <span className="font-semibold text-slate-900">Unbekannter Job</span>
                   )}
-                </td>
-                <td className="px-5 py-3.5 text-slate-500">{app.job?.company ?? "–"}</td>
-                <td className="px-5 py-3.5">
-                  {typeof app.matchScore === "number" ? (
-                    <span className="font-semibold text-brand-600">{app.matchScore}%</span>
-                  ) : (
-                    <span className="text-slate-400">–</span>
-                  )}
-                </td>
-                <td className="px-5 py-3.5">
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[app.status]}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[app.status]}`}
                   >
                     <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[app.status]}`} />
                     {APPLICATION_STATUS_LABELS[app.status]}
                   </span>
-                </td>
-                <td className="px-5 py-3.5 text-slate-400">{formatDate(app.appliedAt)}</td>
-                <td className="px-5 py-3.5 text-slate-400">{app.notes ?? "–"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
+                <p className="text-sm text-slate-500">
+                  {app.job?.company ?? "–"}
+                  {app.job?.location ? ` · ${app.job.location}` : ""}
+                </p>
+                {app.notes && (
+                  <p className="text-xs text-slate-400 italic">{app.notes}</p>
+                )}
+              </div>
 
-      {applications.length === 0 && (
-        <div className="rounded-2xl border border-brand-100 bg-white p-8 text-center text-sm shadow-sm">
-          <p className="text-2xl">📋</p>
-          <p className="mt-2 font-medium text-slate-700">Noch keine Bewerbungen.</p>
-          <Link
-            href="/jobs"
-            className="mt-3 inline-block font-semibold text-brand-600 hover:underline"
-          >
-            Jetzt passende Jobs finden →
-          </Link>
+              {/* Right: meta + actions */}
+              <div className="flex shrink-0 items-center gap-4">
+                {typeof app.matchScore === "number" && (
+                  <div className="text-center">
+                    <p className="text-xs font-medium text-slate-400">Match</p>
+                    <p className="text-lg font-extrabold text-brand-600">{app.matchScore}%</p>
+                  </div>
+                )}
+                <div className="text-center">
+                  <p className="text-xs font-medium text-slate-400">Datum</p>
+                  <p className="text-sm font-semibold text-slate-700">{formatDate(app.appliedAt)}</p>
+                </div>
+                {app.job && (
+                  <a
+                    href={app.job.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                  >
+                    Anzeige ↗
+                  </a>
+                )}
+                {app.status !== "withdrawn" && (
+                  <form action={withdrawApplicationAction.bind(null, app.id)}>
+                    <button
+                      type="submit"
+                      className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50"
+                    >
+                      Zurückziehen
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

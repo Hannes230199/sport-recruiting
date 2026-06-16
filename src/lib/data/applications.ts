@@ -129,6 +129,24 @@ export async function createOrUpdateApplication(
 }
 
 /**
+ * Zieht eine Bewerbung zurück (setzt Status auf "withdrawn").
+ * Nur der Besitzer der Bewerbung darf das tun (RLS).
+ */
+export async function withdrawApplication(
+  supabase: SupabaseClient,
+  applicationId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("applications")
+    .update({ status: "withdrawn" as ApplicationStatus })
+    .eq("id", applicationId);
+
+  if (error) {
+    throw new Error(`Bewerbung konnte nicht zurückgezogen werden: ${error.message}`);
+  }
+}
+
+/**
  * Alle Bewerbungen aller Kandidat:innen inkl. Job- und Kandidat:innen-Daten
  * (Recruiter-Bereich). Setzt voraus, dass die RLS-Policy
  * "Recruiter lesen alle Bewerbungen" greift (eingeloggter Nutzer mit
