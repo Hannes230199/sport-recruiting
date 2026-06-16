@@ -5,7 +5,7 @@ import { isRecruiter } from "@/lib/data/profile";
 const NAV_ITEMS = [
   { href: "/jobs", label: "Jobs" },
   { href: "/profil", label: "Mein Profil" },
-  { href: "/bewerbungen", label: "Meine Bewerbungen" },
+  { href: "/bewerbungen", label: "Bewerbungen" },
 ];
 
 export async function Header() {
@@ -15,35 +15,46 @@ export async function Header() {
   const showRecruiterLink = user ? await isRecruiter(supabase, user.id) : false;
 
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-lg font-bold text-brand-700">
-          SportRecruiting<span className="text-slate-900">.de</span>
+    <header className="sticky top-0 z-40 border-b border-brand-100/60 bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <Link href="/" className="flex items-center gap-1">
+          <span className="bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-lg font-extrabold tracking-tight text-transparent">
+            SportRecruiting
+          </span>
+          <span className="text-lg font-extrabold tracking-tight text-slate-800">.de</span>
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-medium text-slate-600">
+
+        <nav className="flex items-center gap-1 text-sm font-medium text-slate-600">
           {NAV_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} className="hover:text-brand-700">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-lg px-3 py-1.5 transition-colors hover:bg-brand-50 hover:text-brand-700"
+            >
               {item.label}
             </Link>
           ))}
           {showRecruiterLink && (
-            <Link href="/recruiter" className="hover:text-brand-700">
+            <Link
+              href="/recruiter"
+              className="rounded-lg px-3 py-1.5 transition-colors hover:bg-accent-100 hover:text-accent-700"
+            >
               Recruiter
             </Link>
           )}
           {user ? (
-            <div className="flex items-center gap-3">
-              <span className="hidden text-xs text-slate-400 sm:inline">{user.email}</span>
-              <form action="/auth/signout" method="post">
-                <button type="submit" className="hover:text-brand-700">
-                  Abmelden
-                </button>
-              </form>
-            </div>
+            <form action="/auth/signout" method="post" className="ml-2">
+              <button
+                type="submit"
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700"
+              >
+                Abmelden
+              </button>
+            </form>
           ) : (
             <Link
               href="/login"
-              className="rounded-lg bg-brand-600 px-3 py-1.5 text-white hover:bg-brand-700"
+              className="ml-2 rounded-lg bg-gradient-to-r from-brand-600 to-accent-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
             >
               Anmelden
             </Link>

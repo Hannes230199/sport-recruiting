@@ -3,11 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
+  --background: #f7f8ff;
   --foreground: #0f172a;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
+}
+
+@layer base {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    @apply transition-colors duration-150;
+  }
 }

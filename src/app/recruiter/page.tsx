@@ -7,18 +7,17 @@ import { getAllApplications } from "@/lib/data/applications";
 import { updateStatus } from "./actions";
 
 const STATUS_STYLES: Record<ApplicationStatus, string> = {
-  draft: "bg-slate-100 text-slate-700",
-  submitted: "bg-blue-100 text-blue-700",
-  in_review: "bg-amber-100 text-amber-700",
-  interview: "bg-purple-100 text-purple-700",
-  offer: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
-  withdrawn: "bg-slate-100 text-slate-500",
+  draft:     "bg-slate-100 text-slate-600",
+  submitted: "bg-brand-50 text-brand-700",
+  in_review: "bg-amber-50 text-amber-700",
+  interview: "bg-accent-100 text-accent-700",
+  offer:     "bg-green-50 text-green-700",
+  rejected:  "bg-red-50 text-red-600",
+  withdrawn: "bg-slate-100 text-slate-400",
 };
 
 const STATUS_OPTIONS = Object.entries(APPLICATION_STATUS_LABELS) as [ApplicationStatus, string][];
-
-const VALID_STATUSES = new Set<ApplicationStatus>(STATUS_OPTIONS.map(([status]) => status));
+const VALID_STATUSES = new Set<ApplicationStatus>(STATUS_OPTIONS.map(([s]) => s));
 
 function formatDate(iso: string | null): string {
   if (!iso) return "–";
@@ -36,21 +35,22 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
-  if (!user) {
-    redirect("/login?next=/recruiter");
-  }
+  if (!user) redirect("/login?next=/recruiter");
 
   const profile = await getOrCreateProfile(supabase, user.id, user.email ?? "");
 
   if (!profile.isRecruiter) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
-        <h1 className="text-lg font-semibold text-slate-900">Kein Zugriff</h1>
-        <p className="mt-2">
-          Dieser Bereich ist nur für Recruiter:innen freigeschaltet. Falls du Zugriff brauchst,
-          wende dich an die Administration.
+      <div className="mx-auto max-w-md rounded-2xl border border-brand-100 bg-white p-8 text-center shadow-sm">
+        <p className="text-3xl">🔒</p>
+        <h1 className="mt-3 text-lg font-bold text-slate-900">Kein Zugriff</h1>
+        <p className="mt-2 text-sm text-slate-500">
+          Dieser Bereich ist nur für Recruiter:innen freigeschaltet. Wende dich an die Administration.
         </p>
-        <Link href="/" className="mt-4 inline-block font-medium text-brand-700 hover:underline">
+        <Link
+          href="/"
+          className="mt-5 inline-block rounded-xl bg-brand-50 px-5 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100"
+        >
           Zur Startseite
         </Link>
       </div>
@@ -77,17 +77,19 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Bewerbungen verwalten</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Übersicht über alle eingegangenen Bewerbungen. Status und Notizen können hier direkt
-          aktualisiert werden.
+        <p className="mt-1 text-sm text-slate-500">
+          Alle eingegangenen Bewerbungen – Status und Notizen direkt hier aktualisieren.
         </p>
       </div>
 
+      {/* Filter pills */}
       <div className="flex flex-wrap gap-2 text-sm">
         <Link
           href="/recruiter"
-          className={`rounded-full px-3 py-1.5 font-medium ${
-            !statusFilter ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          className={`rounded-full px-4 py-1.5 font-semibold transition-colors ${
+            !statusFilter
+              ? "bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-sm"
+              : "border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-700"
           }`}
         >
           Alle ({allApplications.length})
@@ -96,10 +98,10 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
           <Link
             key={status}
             href={`/recruiter?status=${status}`}
-            className={`rounded-full px-3 py-1.5 font-medium ${
+            className={`rounded-full px-4 py-1.5 font-semibold transition-colors ${
               statusFilter === status
-                ? "bg-brand-600 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-sm"
+                : "border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-700"
             }`}
           >
             {label} ({counts[status] ?? 0})
@@ -107,27 +109,28 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      {/* Table */}
+      <div className="overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+          <thead className="border-b border-slate-100 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400">
             <tr>
-              <th className="px-4 py-3 font-medium">Kandidat:in</th>
-              <th className="px-4 py-3 font-medium">Job</th>
-              <th className="px-4 py-3 font-medium">Unternehmen</th>
-              <th className="px-4 py-3 font-medium">Match</th>
-              <th className="px-4 py-3 font-medium">Beworben am</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Bearbeiten</th>
+              <th className="px-5 py-3">Kandidat:in</th>
+              <th className="px-5 py-3">Job</th>
+              <th className="px-5 py-3">Unternehmen</th>
+              <th className="px-5 py-3">Match</th>
+              <th className="px-5 py-3">Datum</th>
+              <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3">Bearbeiten</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-50">
             {applications.map((app) => (
-              <tr key={app.id}>
-                <td className="px-4 py-3">
+              <tr key={app.id} className="transition-colors hover:bg-brand-50/30">
+                <td className="px-5 py-3.5">
                   <p className="font-medium text-slate-900">{app.candidate?.fullName || "–"}</p>
-                  <p className="text-xs text-slate-500">{app.candidate?.email}</p>
+                  <p className="text-xs text-slate-400">{app.candidate?.email}</p>
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-900">
+                <td className="px-5 py-3.5 font-medium text-slate-800">
                   {app.job ? (
                     <Link href={`/jobs/${app.job.id}`} className="hover:text-brand-700 hover:underline">
                       {app.job.title}
@@ -136,25 +139,27 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
                     "Unbekannter Job"
                   )}
                 </td>
-                <td className="px-4 py-3 text-slate-600">{app.job?.company ?? "–"}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  {typeof app.matchScore === "number" ? `${app.matchScore}%` : "–"}
+                <td className="px-5 py-3.5 text-slate-500">{app.job?.company ?? "–"}</td>
+                <td className="px-5 py-3.5">
+                  {typeof app.matchScore === "number" ? (
+                    <span className="font-semibold text-brand-600">{app.matchScore}%</span>
+                  ) : (
+                    <span className="text-slate-400">–</span>
+                  )}
                 </td>
-                <td className="px-4 py-3 text-slate-600">{formatDate(app.appliedAt)}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[app.status]}`}
-                  >
+                <td className="px-5 py-3.5 text-slate-400">{formatDate(app.appliedAt)}</td>
+                <td className="px-5 py-3.5">
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[app.status]}`}>
                     {APPLICATION_STATUS_LABELS[app.status]}
                   </span>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-5 py-3.5">
                   <form action={updateStatus} className="flex flex-col gap-2">
                     <input type="hidden" name="applicationId" value={app.id} />
                     <select
                       name="status"
                       defaultValue={app.status}
-                      className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-700"
+                      className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 focus:border-brand-400 focus:outline-none"
                     >
                       {STATUS_OPTIONS.map(([status, label]) => (
                         <option key={status} value={status}>
@@ -166,12 +171,12 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
                       name="notes"
                       defaultValue={app.notes ?? ""}
                       rows={2}
-                      placeholder="Interne Notiz..."
-                      className="w-48 rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-700"
+                      placeholder="Interne Notiz…"
+                      className="w-44 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 focus:border-brand-400 focus:outline-none"
                     />
                     <button
                       type="submit"
-                      className="self-start rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700"
+                      className="self-start rounded-lg bg-gradient-to-r from-brand-600 to-accent-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
                       Speichern
                     </button>
@@ -184,10 +189,10 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
       </div>
 
       {applications.length === 0 && (
-        <p className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
-          Keine Bewerbungen{statusFilter ? ` mit Status „${APPLICATION_STATUS_LABELS[statusFilter]}"` : ""}{" "}
-          gefunden.
-        </p>
+        <div className="rounded-2xl border border-brand-100 bg-white p-8 text-center text-sm text-slate-500 shadow-sm">
+          Keine Bewerbungen
+          {statusFilter ? ` mit Status „${APPLICATION_STATUS_LABELS[statusFilter]}"` : ""} gefunden.
+        </div>
       )}
     </div>
   );
