@@ -126,7 +126,7 @@ export default async function BewerbungenPage({ searchParams }: BewerbungenPageP
           </p>
           {!statusFilter && (
             <p className="mt-1 text-sm text-slate-500">
-              Öffne eine Stellenanzeige und klicke auf „Bewerbung tracken", um sie hier zu speichern.
+              {'Öffne eine Stellenanzeige und klicke auf „Bewerbung tracken", um sie hier zu speichern.'}
             </p>
           )}
           <Link
