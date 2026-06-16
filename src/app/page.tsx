@@ -9,9 +9,9 @@ export default async function HomePage() {
   const latestJobs = await getLatestJobs(supabase, 4);
 
   return (
-    <div className="space-y-20">
+    <div className="space-y-10">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1e1a6b] via-[#3d35b5] to-[#7c3aed] px-8 py-20 text-white shadow-xl">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1e1a6b] via-[#3d35b5] to-[#7c3aed] px-8 py-10 text-white shadow-xl">
         {/* Decorative blobs */}
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/5 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-accent-400/10 blur-3xl" />
@@ -20,17 +20,17 @@ export default async function HomePage() {
           <span className="inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/80">
             Täglich aktualisiert
           </span>
-          <h1 className="mt-4 max-w-2xl text-4xl font-extrabold leading-tight sm:text-5xl">
+          <h1 className="mt-3 max-w-2xl text-3xl font-extrabold leading-tight sm:text-4xl">
             Der Sport-Jobmarkt,{" "}
             <span className="text-accent-300">gebündelt</span>{" "}
             an einem Ort.
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75">
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75">
             Wir sammeln täglich Stellenangebote aus den wichtigsten deutschen
             Sport-Jobbörsen, matchen sie automatisch mit deinem Profil und
             geben dir eine klare Übersicht über alle deine Bewerbungen.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/jobs"
               className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-brand-700 shadow-sm transition-transform hover:scale-[1.02] hover:shadow-md"
