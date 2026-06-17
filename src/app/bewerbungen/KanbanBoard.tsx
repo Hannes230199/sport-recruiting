@@ -104,8 +104,8 @@ export default function KanbanBoard({ initialApplications }: Props) {
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto pb-4">
-          <div className="flex gap-4" style={{ minWidth: `${COLUMNS.length * 292}px` }}>
+        <div className="overflow-x-auto pb-1">
+          <div className="flex min-w-0 gap-3">
             {COLUMNS.map((col) => {
               const colApps = appsIn(col.status);
               const isOver = dragOverCol === col.status;
@@ -113,14 +113,14 @@ export default function KanbanBoard({ initialApplications }: Props) {
               return (
                 <div
                   key={col.status}
-                  className="flex w-[280px] shrink-0 flex-col rounded-2xl border border-slate-200 bg-slate-50/60"
+                  className="flex min-w-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-slate-50/60"
                   onDragOver={(e) => onColDragOver(e, col.status)}
                   onDragLeave={() => dragOverCol === col.status && setDragOverCol(null)}
                   onDrop={(e) => onColDrop(e, col.status)}
                 >
                   {/* Column header */}
                   <div className={`flex items-center justify-between rounded-t-2xl px-4 py-3 ${col.headerClass}`}>
-                    <div className="flex items-center gap-2 text-sm font-bold">
+                    <div className="flex items-center gap-1.5 text-xs font-bold">
                       <span className={`h-2 w-2 rounded-full ${col.dotColor}`} />
                       {APPLICATION_STATUS_LABELS[col.status]}
                     </div>
@@ -151,7 +151,7 @@ export default function KanbanBoard({ initialApplications }: Props) {
                         {app.job ? (
                           <Link
                             href={`/jobs/${app.job.id}`}
-                            className="block text-sm font-semibold text-slate-900 hover:text-brand-700 hover:underline"
+                            className="block text-xs font-semibold text-slate-900 hover:text-brand-700 hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {app.job.title}
@@ -159,7 +159,7 @@ export default function KanbanBoard({ initialApplications }: Props) {
                         ) : (
                           <p className="text-sm font-semibold text-slate-900">Unbekannter Job</p>
                         )}
-                        <p className="mt-0.5 text-xs text-slate-500 leading-snug">
+                        <p className="mt-0.5 text-xs text-slate-500 leading-snug line-clamp-1">
                           {app.job?.company ?? "–"}
                           {app.job?.location ? ` · ${app.job.location}` : ""}
                         </p>
