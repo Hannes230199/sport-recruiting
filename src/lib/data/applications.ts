@@ -129,6 +129,29 @@ export async function createOrUpdateApplication(
 }
 
 /**
+ * Kandidat:in aktualisiert eigene Bewerbung (Status und/oder Notizen).
+ * Partielle Updates: nur übergebene Felder werden geändert.
+ */
+export async function updateCandidateApplication(
+  supabase: SupabaseClient,
+  applicationId: string,
+  updates: { status?: ApplicationStatus; notes?: string | null }
+): Promise<void> {
+  const payload: Record<string, unknown> = {};
+  if (updates.status !== undefined) payload.status = updates.status;
+  if ("notes" in updates) payload.notes = updates.notes;
+
+  const { error } = await supabase
+    .from("applications")
+    .update(payload)
+    .eq("id", applicationId);
+
+  if (error) {
+    throw new Error(`Bewerbung konnte nicht aktualisiert werden: ${error.message}`);
+  }
+}
+
+/**
  * Zieht eine Bewerbung zurück (setzt Status auf "withdrawn").
  * Nur der Besitzer der Bewerbung darf das tun (RLS).
  */
