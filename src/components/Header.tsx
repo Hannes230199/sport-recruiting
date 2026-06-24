@@ -4,7 +4,7 @@ import { isRecruiter } from "@/lib/data/profile";
 
 const NAV_ITEMS = [
   { href: "/jobs", label: "Jobs" },
-  { href: "/profil", label: "Mein Profil" },
+  { href: "/profil", label: "Profil" },
   { href: "/bewerbungen", label: "Bewerbungen" },
 ];
 
@@ -15,21 +15,27 @@ export async function Header() {
   const showRecruiterLink = user ? await isRecruiter(supabase, user.id) : false;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-brand-100/60 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-slate-100 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href="/" className="flex items-center gap-1">
-          <span className="bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-lg font-extrabold tracking-tight text-transparent">
-            SportRecruiting
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-1.5">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
+            <circle cx="10" cy="10" r="10" className="fill-brand-600" />
+            <path d="M6 14L10 6l4 8" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M7.5 11h5" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          <span className="text-base font-bold tracking-tight text-slate-900">
+            SportRecruiting<span className="text-slate-400 font-normal">.de</span>
           </span>
-          <span className="text-lg font-extrabold tracking-tight text-slate-800">.de</span>
         </Link>
 
-        <nav className="flex items-center gap-1 text-sm font-medium text-slate-600">
+        {/* Nav */}
+        <nav className="flex items-center gap-0.5 text-sm font-medium text-slate-600">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-1.5 transition-colors hover:bg-brand-50 hover:text-brand-700"
+              className="rounded-md px-3 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900"
             >
               {item.label}
             </Link>
@@ -37,7 +43,7 @@ export async function Header() {
           {showRecruiterLink && (
             <Link
               href="/recruiter"
-              className="rounded-lg px-3 py-1.5 transition-colors hover:bg-accent-100 hover:text-accent-700"
+              className="rounded-md px-3 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900"
             >
               Recruiter
             </Link>
@@ -46,7 +52,7 @@ export async function Header() {
             <form action="/auth/signout" method="post" className="ml-2">
               <button
                 type="submit"
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700"
+                className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
               >
                 Abmelden
               </button>
@@ -54,7 +60,7 @@ export async function Header() {
           ) : (
             <Link
               href="/login"
-              className="ml-2 rounded-lg bg-gradient-to-r from-brand-600 to-accent-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+              className="ml-2 rounded-md bg-brand-600 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
             >
               Anmelden
             </Link>
