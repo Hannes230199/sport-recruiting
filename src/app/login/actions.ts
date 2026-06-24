@@ -1,47 +1,46 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-/**
- * Server Action: schickt einen Magic Link (passwortlose Anmeldung per
- * E-Mail) an die angegebene Adresse. Supabase erstellt beim ersten Login
- * automatisch einen `auth.users`-Eintrag.
- *
- * Der Link führt zu `/auth/callback`, wo die Session anhand des
- * `code`-Parameters erstellt wird (PKCE-Flow).
- */
-export async function signInWithMagicLink(formData: FormData) {
+/** Server Action: meldet den Nutzer mit E-Mail und Passwort an. */
+export async function signInWithPassword(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "").trim();
 
-  if (!email) {
-    redirect(`/login?error=${encodeURIComponent("Bitte gib eine E-Mail-Adresse ein.")}`);
+  if (!email || !password) {
+    redirect(`/login?error=${encodeURIComponent("Bitte E-Mail und Passwort eingeben.")}`);
   }
 
   const supabase = await createClient();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? (await headers()).get("origin") ?? "http://localhost:3000";
-
-  const callbackUrl = next
-    ? `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`
-    : `${siteUrl}/auth/callback`;
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: callbackUrl,
-    },
-  });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect(`/login?error=${encodeURIComponent("E-Mail oder Passwort falsch.")}`);
   }
 
-  redirect(
-    `/login?message=${encodeURIComponent(
-      "Wir haben dir einen Anmeldelink per E-Mail geschickt. Bitte prüfe dein Postfach."
-    )}`
-  );
+  // Check if onboarding is complete (full_name set)
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase
+      .from("candidate_profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile || !profile.full_name) {
+      redirect("/onboarding");
+    }
+  }
+
+  redirect(next || "/profil");
+}
+
+/** Server Action: meldet den aktuell eingeloggten Nutzer ab. */
+export async function signOut() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/");
 }
