@@ -190,25 +190,25 @@ export default function KanbanBoard({ initialApplications }: Props) {
 
                         {/* Notes */}
                         {editingId === app.id ? (
-                          <div className="mt-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+                          <div className="mt-2.5" onClick={(e) => e.stopPropagation()}>
                             <textarea
                               value={notesValue}
                               onChange={(e) => setNotesValue(e.target.value)}
-                              rows={3}
+                              rows={2}
                               autoFocus
                               placeholder="Deine Notiz…"
-                              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-100"
+                              className="w-full rounded-lg border border-brand-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-100"
                             />
-                            <div className="flex gap-2">
+                            <div className="mt-1.5 flex items-center gap-2">
                               <button
                                 onClick={() => saveNotes(app.id)}
-                                className="rounded-lg bg-brand-600 px-3 py-1 text-xs font-semibold text-white hover:bg-brand-700"
+                                className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-700"
                               >
                                 Speichern
                               </button>
                               <button
                                 onClick={() => setEditingId(null)}
-                                className="rounded-lg px-3 py-1 text-xs text-slate-400 hover:bg-slate-100"
+                                className="text-xs text-slate-400 hover:text-slate-600"
                               >
                                 Abbrechen
                               </button>
@@ -220,12 +220,12 @@ export default function KanbanBoard({ initialApplications }: Props) {
                               e.stopPropagation();
                               openNotes(app);
                             }}
-                            className="mt-3 w-full rounded-lg border border-dashed border-slate-200 px-2 py-2 text-left text-xs transition-colors hover:border-brand-300 hover:text-brand-500"
+                            className="mt-2.5 w-full rounded-lg border border-dashed border-slate-200 px-2 py-1.5 text-left text-xs transition-colors hover:border-brand-300 hover:text-brand-500"
                           >
                             {app.notes ? (
                               <span className="text-slate-600 line-clamp-2">{app.notes}</span>
                             ) : (
-                              <span className="text-slate-400">+ Notiz hinzufügen</span>
+                              <span className="text-slate-400">+ Notiz</span>
                             )}
                           </button>
                         )}
