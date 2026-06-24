@@ -1,10 +1,6 @@
 import Link from "next/link";
-import { EMPLOYMENT_TYPE_LABELS, Job, JOB_SOURCES } from "@/lib/types";
+import { EMPLOYMENT_TYPE_LABELS, Job } from "@/lib/types";
 import { CompanyAvatar } from "./CompanyAvatar";
-
-function sourceLabel(source: Job["source"]): string {
-  return JOB_SOURCES.find((s) => s.id === source)?.label ?? source;
-}
 
 function formatDate(iso: string | null): string | null {
   if (!iso) return null;
@@ -104,14 +100,16 @@ export function JobCard({ job, matchScore }: { job: Job; matchScore?: number }) 
               {job.category}
             </span>
           )}
-          {job.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">
+          {job.location && (
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">
+              📍 {job.location}
+            </span>
+          )}
+          {job.tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-400">
               {tag}
             </span>
           ))}
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-400">
-            {sourceLabel(job.source)}
-          </span>
           {posted && (
             <span className="ml-auto text-slate-400">{posted}</span>
           )}
