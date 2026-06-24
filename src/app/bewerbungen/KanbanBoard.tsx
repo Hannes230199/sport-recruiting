@@ -199,10 +199,10 @@ export default function KanbanBoard({ initialApplications }: Props) {
                               placeholder="Deine Notiz…"
                               className="w-full rounded-lg border border-brand-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-100"
                             />
-                            <div className="mt-1.5 flex items-center gap-2">
+                            <div className="mt-1.5 flex items-center justify-between">
                               <button
                                 onClick={() => saveNotes(app.id)}
-                                className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-700"
+                                className="rounded-md bg-brand-600 px-3 py-1 text-xs font-semibold text-white hover:bg-brand-700"
                               >
                                 Speichern
                               </button>
