@@ -47,6 +47,7 @@ export interface JobFilters {
   source?: string;
   category?: string;
   employmentType?: string;
+  location?: string;
 }
 
 const JOB_COLUMNS =
@@ -84,6 +85,9 @@ export async function getJobs(supabase: SupabaseClient, filters: JobFilters): Pr
   }
   if (filters.employmentType) {
     query = query.eq("employment_type", filters.employmentType);
+  }
+  if (filters.location) {
+    query = query.ilike("location", `%${filters.location.replace(/[%_]/g, "")}%`);
   }
   if (filters.q && filters.q.trim()) {
     const q = filters.q.trim();
@@ -123,6 +127,26 @@ export async function getJobById(supabase: SupabaseClient, id: string): Promise<
   if (!data) return null;
 
   return rowToJob(data as JobRow);
+}
+
+/** Distinkte, nicht-leere Standorte aller aktiven Jobs (für den Filter). */
+export async function getJobLocations(supabase: SupabaseClient): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("location")
+    .eq("is_active", true)
+    .not("location", "is", null);
+
+  if (error) {
+    console.error("getJobLocations:", error.message);
+    return [];
+  }
+
+  const locations = new Set<string>();
+  for (const row of data as { location: string | null }[]) {
+    if (row.location) locations.add(row.location.trim());
+  }
+  return Array.from(locations).sort();
 }
 
 /** Distinkte, nicht-leere Kategorien aller aktiven Jobs (für den Filter). */
