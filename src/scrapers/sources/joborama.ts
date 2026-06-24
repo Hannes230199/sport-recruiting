@@ -3,17 +3,20 @@ import { Scraper, ScrapedJob } from "../types";
 import { cleanText, extractTags, guessCategory, guessEmploymentType, parseGermanDate } from "../normalize";
 
 const BASE_URL = "https://www.joborama.de";
+const MAX_CATEGORY_PAGES = 10;
 
 const USER_AGENT =
   process.env.SCRAPER_USER_AGENT ??
   "SportRecruitingBot/0.1 (+mailto:hannes.schwedhelm@ringier.ch)";
 
-async function fetchHtml(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) {
-    throw new Error(`joborama: GET ${url} -> ${res.status}`);
+async function fetchHtml(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok) return null;
+    return res.text();
+  } catch {
+    return null;
   }
-  return res.text();
 }
 
 interface RawEntry {
@@ -36,8 +39,7 @@ interface RawEntry {
  * auf den Kategorie-Seiten ("Alle Jobs"-Links) identisch.
  *
  * Dieser Scraper liest die Startseite (für die Kategorie-Zuordnung) und
- * folgt zusätzlich den "Alle Jobs"-Links, um mehr als 4 Jobs pro Kategorie
- * zu erhalten.
+ * paginiert durch alle Kategorie-Seiten via `?page=N`.
  */
 export const joboramaScraper: Scraper = {
   source: "joborama",
@@ -49,15 +51,17 @@ export const joboramaScraper: Scraper = {
     const seen = new Set<string>();
     const entries: RawEntry[] = [];
 
-    const html = await fetchHtml(`${BASE_URL}/`);
-    const $ = cheerio.load(html);
+    const homeHtml = await fetchHtml(`${BASE_URL}/`);
+    if (!homeHtml) return [];
+    const $ = cheerio.load(homeHtml);
 
-    const categoryLinks: { category: string; allJobsHref: string }[] = [];
+    const categoryLinks: { category: string | null; allJobsHref: string }[] = [];
 
     $("section.job-cards article.card").each((_, article) => {
       const $article = $(article);
       const category = cleanText($article.find(".card-header h2").first().text()) || null;
 
+      // Collect preview jobs shown on the homepage (associate category)
       $article.find("a.job-item-link").each((_, el) => {
         const $el = $(el);
         const href = $el.attr("href");
@@ -65,33 +69,38 @@ export const joboramaScraper: Scraper = {
         const sourceUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
         if (seen.has(sourceUrl)) return;
         seen.add(sourceUrl);
-
         const title = cleanText($el.find(".job-title").first().text());
         const company = cleanText($el.find(".job-company").first().text()) || null;
         if (!title) return;
-
         entries.push({ href: sourceUrl, title, company, category });
       });
 
+      // Find the "Alle Jobs" link for this category
       $article.find("a").each((_, el) => {
         const $el = $(el);
         const text = cleanText($el.text());
         const href = $el.attr("href");
         if (href && /alle jobs/i.test(text)) {
           categoryLinks.push({
-            category: category ?? "",
+            category,
             allJobsHref: href.startsWith("http") ? href : `${BASE_URL}${href}`,
           });
         }
       });
     });
 
-    // Zusätzliche Jobs von den "Alle Jobs"-Kategorieseiten laden.
+    // Paginate through each category's full job list
     for (const { category, allJobsHref } of categoryLinks) {
       if (typeof limit === "number" && entries.length >= limit) break;
-      try {
-        const categoryHtml = await fetchHtml(allJobsHref);
-        const $cat = cheerio.load(categoryHtml);
+
+      for (let page = 1; page <= MAX_CATEGORY_PAGES; page++) {
+        const pageUrl = page === 1 ? allJobsHref : `${allJobsHref}?page=${page}`;
+        const catHtml = await fetchHtml(pageUrl);
+        if (!catHtml) break;
+
+        const $cat = cheerio.load(catHtml);
+        const before = entries.length;
+
         $cat("a.job-item-link").each((_, el) => {
           const $el = $cat(el);
           const href = $el.attr("href");
@@ -99,15 +108,13 @@ export const joboramaScraper: Scraper = {
           const sourceUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
           if (seen.has(sourceUrl)) return;
           seen.add(sourceUrl);
-
           const title = cleanText($el.find(".job-title").first().text());
           const company = cleanText($el.find(".job-company").first().text()) || null;
           if (!title) return;
-
-          entries.push({ href: sourceUrl, title, company, category: category || null });
+          entries.push({ href: sourceUrl, title, company, category });
         });
-      } catch {
-        // Kategorie-Seite konnte nicht geladen werden - Startseiten-Jobs reichen trotzdem.
+
+        if (entries.length === before) break; // no new entries → last page
       }
     }
 

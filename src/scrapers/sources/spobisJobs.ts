@@ -5,17 +5,20 @@ import { Scraper, ScrapedJob } from "../types";
 import { cleanText, extractTags, guessCategory } from "../normalize";
 
 const BASE_URL = "https://www.spobis-jobs.com";
+const MAX_PAGES = 20;
 
 const USER_AGENT =
   process.env.SCRAPER_USER_AGENT ??
   "SportRecruitingBot/0.1 (+mailto:hannes.schwedhelm@ringier.ch)";
 
-async function fetchHtml(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) {
-    throw new Error(`spobis-jobs: GET ${url} -> ${res.status}`);
+async function fetchHtml(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok) return null;
+    return res.text();
+  } catch {
+    return null;
   }
-  return res.text();
 }
 
 // Reihenfolge wichtig: "Werkstudent" vor "Studen..." prüfen etc.
@@ -74,48 +77,73 @@ export const spobisJobsScraper: Scraper = {
   baseUrl: BASE_URL,
 
   async scrape(limit) {
-    const html = await fetchHtml(`${BASE_URL}/`);
-    const $ = cheerio.load(html);
-
     const jobs: ScrapedJob[] = [];
     const seen = new Set<string>();
 
-    $('a[href^="/jobs/"], a[href^="https://www.spobis-jobs.com/jobs/"]').each((_, el) => {
-      if (typeof limit === "number" && jobs.length >= limit) return;
+    // Try paginated job list first (/jobs?page=N), fall back to homepage
+    const urls: string[] = [];
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      urls.push(page === 1 ? `${BASE_URL}/jobs` : `${BASE_URL}/jobs?page=${page}`);
+    }
+    urls.push(`${BASE_URL}/`); // homepage as fallback
 
-      const href = $(el).attr("href");
-      if (!href) return;
-      const sourceUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
-      if (seen.has(sourceUrl)) return;
+    let anyFound = false;
 
-      const card = $(el);
-      const title = cleanText(card.find(".home_job_title").first().text());
-      if (!title) return;
+    for (const url of urls) {
+      if (typeof limit === "number" && jobs.length >= limit) break;
+      // Skip pagination pages if the /jobs listing found nothing (homepage mode)
+      if (anyFound && url === `${BASE_URL}/`) break;
 
-      seen.add(sourceUrl);
+      const html = await fetchHtml(url);
+      if (!html) {
+        if (url.includes("?page=")) break; // pagination exhausted
+        continue;
+      }
 
-      const employmentTypeRaw = cleanText(card.find(".home_job_employment_type").first().text()) || null;
-      const employmentType = mapEmploymentType(employmentTypeRaw);
-      const company = cleanText(card.find(".home-company-link .is_company").first().text()) || null;
-      const location = readTag($, card, "Ort");
-      const category = readTag($, card, "Tätigkeitsbereich");
+      const $ = cheerio.load(html);
+      const before = jobs.length;
 
-      const fullText = `${title} ${employmentTypeRaw ?? ""} ${category ?? ""}`;
+      $('a[href^="/jobs/"], a[href^="https://www.spobis-jobs.com/jobs/"]').each((_, el) => {
+        if (typeof limit === "number" && jobs.length >= limit) return;
 
-      jobs.push({
-        externalId: sourceUrl.replace(/\/+$/, "").split("/").pop() ?? sourceUrl,
-        sourceUrl,
-        title,
-        company,
-        location,
-        employmentType,
-        category: category ?? guessCategory(title),
-        tags: extractTags(fullText),
-        description: cleanText(card.text()),
-        salaryRange: null,
-        postedAt: null,
+        const href = $(el).attr("href");
+        if (!href) return;
+        const sourceUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
+        if (seen.has(sourceUrl)) return;
+
+        const card = $(el);
+        const title = cleanText(card.find(".home_job_title").first().text());
+        if (!title) return;
+
+        seen.add(sourceUrl);
+
+        const employmentTypeRaw = cleanText(card.find(".home_job_employment_type").first().text()) || null;
+        const employmentType = mapEmploymentType(employmentTypeRaw);
+        const company = cleanText(card.find(".home-company-link .is_company").first().text()) || null;
+        const location = readTag($, card, "Ort");
+        const category = readTag($, card, "Tätigkeitsbereich");
+
+        const fullText = `${title} ${employmentTypeRaw ?? ""} ${category ?? ""}`;
+
+        jobs.push({
+          externalId: sourceUrl.replace(/\/+$/, "").split("/").pop() ?? sourceUrl,
+          sourceUrl,
+          title,
+          company,
+          location,
+          employmentType,
+          category: category ?? guessCategory(title),
+          tags: extractTags(fullText),
+          description: cleanText(card.text()),
+          salaryRange: null,
+          postedAt: null,
+        });
       });
-    });
+
+      const found = jobs.length - before;
+      if (found > 0) anyFound = true;
+      if (found === 0 && url.includes("?page=")) break; // empty paginated page → done
+    }
 
     return jobs;
   },

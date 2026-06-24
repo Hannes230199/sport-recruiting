@@ -4,9 +4,7 @@ import { cleanText, extractTags, guessCategory, guessEmploymentType } from "../n
 const BASE_URL = "https://jobs.dshs-koeln.de";
 const API_URL = `${BASE_URL}/api/v1/jobs`;
 
-// Ohne explizites Limit holen wir die zuletzt veröffentlichten Jobs (Standard-
-// Sortierung der API ist "created" DESC) - reicht für den täglichen Lauf.
-const DEFAULT_LIMIT = 50;
+const PAGE_SIZE = 50; // items per API request
 
 const USER_AGENT =
   process.env.SCRAPER_USER_AGENT ??
@@ -45,14 +43,29 @@ interface ApiResponse {
   };
 }
 
-async function fetchJobs(limit: number): Promise<ApiJob[]> {
-  const url = `${API_URL}?page=1&limit=${limit}&premium=0`;
+async function fetchPage(page: number): Promise<ApiResponse> {
+  const url = `${API_URL}?page=${page}&limit=${PAGE_SIZE}&premium=0`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) {
     throw new Error(`dshs_koeln: GET ${url} -> ${res.status}`);
   }
-  const json = (await res.json()) as ApiResponse;
-  return json.data ?? [];
+  return (await res.json()) as ApiResponse;
+}
+
+async function fetchAllJobs(): Promise<ApiJob[]> {
+  const allJobs: ApiJob[] = [];
+  const first = await fetchPage(1);
+  allJobs.push(...(first.data ?? []));
+
+  const totalPages = first.meta?.totalPages ?? 1;
+  for (let page = 2; page <= totalPages; page++) {
+    const response = await fetchPage(page);
+    const items = response.data ?? [];
+    if (items.length === 0) break;
+    allJobs.push(...items);
+  }
+
+  return allJobs;
 }
 
 /**
@@ -93,8 +106,7 @@ export const dshsKoelnScraper: Scraper = {
   baseUrl: BASE_URL,
 
   async scrape(limit) {
-    const fetchLimit = typeof limit === "number" ? limit : DEFAULT_LIMIT;
-    const apiJobs = await fetchJobs(fetchLimit);
+    const apiJobs = await fetchAllJobs();
 
     const jobs: ScrapedJob[] = [];
     for (const job of apiJobs) {
@@ -123,6 +135,6 @@ export const dshsKoelnScraper: Scraper = {
       });
     }
 
-    return jobs;
+    return typeof limit === "number" ? jobs.slice(0, limit) : jobs;
   },
 };

@@ -16,6 +16,41 @@ function formatDate(iso: string | null): string | null {
   return date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
+// sport category emoji mapping
+const CATEGORY_ICONS: [string, string][] = [
+  ["fußball", "⚽"], ["fussball", "⚽"],
+  ["basketball", "🏀"],
+  ["tennis", "🎾"],
+  ["handball", "🤾"],
+  ["volleyball", "🏐"],
+  ["schwimm", "🏊"],
+  ["leichtathletik", "🏃"], ["laufen", "🏃"], ["marathon", "🏃"],
+  ["golf", "⛳"],
+  ["radsport", "🚴"], ["cycling", "🚴"], ["fahrrad", "🚴"],
+  ["ski", "⛷️"], ["winter", "⛷️"], ["snowboard", "⛷️"],
+  ["rugby", "🏉"],
+  ["hockey", "🏑"],
+  ["kampfsport", "🥊"], ["judo", "🥋"], ["karate", "🥋"], ["boxen", "🥊"],
+  ["turnen", "🤸"], ["fitness", "🏋️"], ["gym", "🏋️"],
+  ["wassersport", "🌊"], ["segeln", "⛵"], ["rudern", "🚣"],
+  ["reiten", "🐎"], ["pferd", "🐎"],
+  ["marketing", "📣"], ["kommunikation", "📣"],
+  ["management", "📊"], ["sport & management", "📊"],
+  ["event", "🎪"], ["veranstaltung", "🎪"],
+  ["physio", "🩺"], ["medizin", "🩺"], ["gesundheit", "🩺"], ["reha", "🩺"],
+  ["ernährung", "🥗"], ["nutrition", "🥗"],
+  ["it", "💻"], ["digital", "💻"], ["tech", "💻"],
+];
+
+function categoryIcon(category: string | null): string | null {
+  if (!category) return null;
+  const lower = category.toLowerCase();
+  for (const [key, emoji] of CATEGORY_ICONS) {
+    if (lower.includes(key)) return emoji;
+  }
+  return null;
+}
+
 // deterministic bg color from company initial
 const INITIAL_COLORS = [
   "bg-blue-100 text-blue-700",
@@ -45,6 +80,7 @@ const EMPLOYMENT_TAG_COLOR: Record<string, string> = {
 export function JobCard({ job, matchScore }: { job: Job; matchScore?: number }) {
   const posted = formatDate(job.postedAt);
   const companyName = job.company ?? "Unbekannt";
+  const icon = categoryIcon(job.category);
   const initial = companyName.charAt(0).toUpperCase();
   const colorClass = initialColor(companyName);
   const isRecent = job.postedAt
@@ -56,11 +92,11 @@ export function JobCard({ job, matchScore }: { job: Job; matchScore?: number }) 
       href={`/jobs/${job.id}`}
       className="group flex items-center gap-4 border-b border-slate-100 bg-white px-5 py-4 last:border-0 transition-colors hover:bg-slate-50"
     >
-      {/* Company initial */}
+      {/* Category icon or company initial */}
       <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${colorClass}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${icon ? "bg-slate-50" : colorClass + " text-sm font-bold"}`}
       >
-        {initial}
+        {icon ?? initial}
       </div>
 
       {/* Main content */}

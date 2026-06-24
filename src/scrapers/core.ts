@@ -39,19 +39,19 @@ export async function runScrapers(
   scrapers: Scraper[] = SCRAPERS,
   limit?: number
 ): Promise<SourceResult[]> {
-  const results: SourceResult[] = [];
+  // Run all scrapers in parallel to stay within Vercel's function timeout
+  const settled = await Promise.allSettled(
+    scrapers.map((scraper) => scraper.scrape(limit))
+  );
 
-  for (const scraper of scrapers) {
-    try {
-      const jobs = await scraper.scrape(limit);
-      results.push({ source: scraper.source, label: scraper.label, jobs, error: null });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      results.push({ source: scraper.source, label: scraper.label, jobs: [], error: message });
+  return settled.map((result, i) => {
+    const scraper = scrapers[i];
+    if (result.status === "fulfilled") {
+      return { source: scraper.source, label: scraper.label, jobs: result.value, error: null };
     }
-  }
-
-  return results;
+    const message = result.reason instanceof Error ? result.reason.message : String(result.reason);
+    return { source: scraper.source, label: scraper.label, jobs: [], error: message };
+  });
 }
 
 /** Wandelt ein ScrapedJob (camelCase) in eine DB-Zeile (snake_case) um. */

@@ -4,17 +4,20 @@ import { cleanText, extractTags, guessCategory, guessEmploymentType, parseGerman
 
 const BASE_URL = "https://www.sport-job.com";
 const LISTING_PATH = "/de/stellenmarkt";
+const MAX_PAGES = 20;
 
 const USER_AGENT =
   process.env.SCRAPER_USER_AGENT ??
   "SportRecruitingBot/0.1 (+mailto:hannes.schwedhelm@ringier.ch)";
 
-async function fetchHtml(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) {
-    throw new Error(`sport-job: GET ${url} -> ${res.status}`);
+async function fetchHtml(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok) return null;
+    return res.text();
+  } catch {
+    return null;
   }
-  return res.text();
 }
 
 /**
@@ -41,55 +44,65 @@ export const sportJobScraper: Scraper = {
     const jobs: ScrapedJob[] = [];
     const seen = new Set<string>();
 
-    // Nur die erste Seite der Stellenliste (zusätzliche Seiten via ?page=N)
-    const html = await fetchHtml(`${BASE_URL}${LISTING_PATH}`);
-    const $ = cheerio.load(html);
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      if (typeof limit === "number" && jobs.length >= limit) break;
 
-    $(".job-item-container").each((_, el) => {
-      if (typeof limit === "number" && jobs.length >= limit) return;
+      const url =
+        page === 1
+          ? `${BASE_URL}${LISTING_PATH}`
+          : `${BASE_URL}${LISTING_PATH}?page=${page}`;
+      const html = await fetchHtml(url);
+      if (!html) break;
 
-      const container = $(el);
-      const link = container
-        .find("a")
-        .filter((_, a) => /stelle anzeigen/i.test(cleanText($(a).text())))
-        .first();
-      const href = link.attr("href");
-      if (!href) return;
+      const $ = cheerio.load(html);
+      let found = 0;
 
-      const sourceUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
-      if (seen.has(sourceUrl)) return;
-      seen.add(sourceUrl);
+      $(".job-item-container").each((_, el) => {
+        const container = $(el);
+        const link = container
+          .find("a")
+          .filter((_, a) => /stelle anzeigen/i.test(cleanText($(a).text())))
+          .first();
+        const href = link.attr("href");
+        if (!href) return;
 
-      const textContainer = container.find(".text-container").first();
-      const title = cleanText(textContainer.find("p strong, strong").first().text());
-      const company = cleanText(textContainer.find("p i, i").first().text()) || null;
+        const sourceUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
+        if (seen.has(sourceUrl)) return;
+        seen.add(sourceUrl);
+        found++;
 
-      const rowText =
-        cleanText(textContainer.find(".row").first().text()) || cleanText(textContainer.text());
+        const textContainer = container.find(".text-container").first();
+        const title = cleanText(textContainer.find("p strong, strong").first().text());
+        const company = cleanText(textContainer.find("p i, i").first().text()) || null;
 
-      const location = extractField(rowText, "Standort", "Stellenart");
-      const employmentTypeRaw = extractField(rowText, "Stellenart", "Online seit");
-      const postedAt = parseGermanDate(extractField(rowText, "Online seit", "Stelle anzeigen"));
+        const rowText =
+          cleanText(textContainer.find(".row").first().text()) || cleanText(textContainer.text());
 
-      const fullText = `${title} ${employmentTypeRaw ?? ""}`;
+        const location = extractField(rowText, "Standort", "Stellenart");
+        const employmentTypeRaw = extractField(rowText, "Stellenart", "Online seit");
+        const postedAt = parseGermanDate(extractField(rowText, "Online seit", "Stelle anzeigen"));
 
-      const externalId = sourceUrl.replace(/\/+$/, "").split("/").pop() ?? sourceUrl;
+        const fullText = `${title} ${employmentTypeRaw ?? ""}`;
+        const externalId = sourceUrl.replace(/\/+$/, "").split("/").pop() ?? sourceUrl;
 
-      jobs.push({
-        externalId,
-        sourceUrl,
-        title: title || cleanText(link.text()),
-        company,
-        location,
-        employmentType: guessEmploymentType(employmentTypeRaw ?? title),
-        category: guessCategory(title),
-        tags: extractTags(fullText),
-        description: rowText,
-        salaryRange: null,
-        postedAt,
+        jobs.push({
+          externalId,
+          sourceUrl,
+          title: title || cleanText(link.text()),
+          company,
+          location,
+          employmentType: guessEmploymentType(employmentTypeRaw ?? title),
+          category: guessCategory(title),
+          tags: extractTags(fullText),
+          description: rowText,
+          salaryRange: null,
+          postedAt,
+        });
       });
-    });
 
-    return jobs;
+      if (found === 0) break; // no results on this page → done
+    }
+
+    return typeof limit === "number" ? jobs.slice(0, limit) : jobs;
   },
 };
