@@ -87,6 +87,8 @@ export interface CandidateProfile {
   desiredRoles: string[];
   desiredLocations: string[];
   employmentTypes: EmploymentType[];
+  /** Wunscharbeitgeber, z.B. ["FC Bayern München", "DFB"] */
+  favoriteCompanies: string[];
   documents: CandidateDocument[];
   isRecruiter: boolean;
   createdAt: string;

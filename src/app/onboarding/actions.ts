@@ -24,6 +24,7 @@ export async function completeOnboarding(formData: FormData) {
   const sports = splitList(formData.get("sports"));
   const desiredRoles = splitList(formData.get("desiredRoles"));
   const employmentTypes = formData.getAll("employmentTypes") as EmploymentType[];
+  const favoriteCompanies = splitList(formData.get("favoriteCompanies"));
 
   // Upsert profile (handles both new and existing users)
   const { error } = await supabase.from("candidate_profiles").upsert(
@@ -35,6 +36,7 @@ export async function completeOnboarding(formData: FormData) {
       sports,
       desired_roles: desiredRoles,
       employment_types: employmentTypes,
+      favorite_companies: favoriteCompanies,
     },
     { onConflict: "id" }
   );

@@ -43,6 +43,7 @@ export async function saveProfile(formData: FormData) {
     desiredRoles: splitList(formData.get("desiredRoles")),
     desiredLocations: splitList(formData.get("desiredLocations")),
     employmentTypes: formData.getAll("employmentTypes") as EmploymentType[],
+    favoriteCompanies: splitList(formData.get("favoriteCompanies")),
   });
 
   revalidatePath("/profil");

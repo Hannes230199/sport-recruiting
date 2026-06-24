@@ -153,6 +153,7 @@ export const MOCK_CANDIDATE: CandidateProfile = {
       uploadedAt: "2026-06-01T10:05:00Z",
     },
   ],
+  favoriteCompanies: [],
   isRecruiter: false,
   createdAt: "2026-05-20T09:00:00Z",
   updatedAt: "2026-06-01T10:05:00Z",

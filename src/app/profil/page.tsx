@@ -158,6 +158,19 @@ export default async function ProfilPage({ searchParams }: ProfilPageProps) {
               />
             </div>
             <div className="sm:col-span-2">
+              <label htmlFor="favoriteCompanies" className="mb-1.5 block text-xs font-medium text-slate-500">
+                Wunscharbeitgeber (kommagetrennt)
+              </label>
+              <input
+                id="favoriteCompanies"
+                name="favoriteCompanies"
+                type="text"
+                defaultValue={candidate.favoriteCompanies.join(", ")}
+                placeholder="FC Bayern München, adidas, DFB…"
+                className={inputClass}
+              />
+            </div>
+            <div className="sm:col-span-2">
               <span className="mb-2 block text-xs font-medium text-slate-500">Anstellungsarten</span>
               <div className="flex flex-wrap gap-3">
                 {(Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentType, string][]).map(

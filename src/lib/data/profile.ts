@@ -13,6 +13,7 @@ interface ProfileRow {
   desired_roles: string[] | null;
   desired_locations: string[] | null;
   employment_types: EmploymentType[] | null;
+  favorite_companies: string[] | null;
   is_recruiter: boolean | null;
   created_at: string;
   updated_at: string;
@@ -28,7 +29,7 @@ interface DocumentRow {
 }
 
 const PROFILE_COLUMNS =
-  "id, full_name, email, phone, location, bio, skills, sports, desired_roles, desired_locations, employment_types, is_recruiter, created_at, updated_at";
+  "id, full_name, email, phone, location, bio, skills, sports, desired_roles, desired_locations, employment_types, favorite_companies, is_recruiter, created_at, updated_at";
 
 function rowToProfile(row: ProfileRow, documents: CandidateDocument[]): CandidateProfile {
   return {
@@ -43,6 +44,7 @@ function rowToProfile(row: ProfileRow, documents: CandidateDocument[]): Candidat
     desiredRoles: row.desired_roles ?? [],
     desiredLocations: row.desired_locations ?? [],
     employmentTypes: row.employment_types ?? [],
+    favoriteCompanies: row.favorite_companies ?? [],
     documents,
     isRecruiter: row.is_recruiter ?? false,
     createdAt: row.created_at,
@@ -116,6 +118,7 @@ export interface ProfileUpdateInput {
   desiredRoles: string[];
   desiredLocations: string[];
   employmentTypes: EmploymentType[];
+  favoriteCompanies: string[];
 }
 
 /** Speichert die vom Nutzer im Profilformular eingegebenen Angaben. */
@@ -136,6 +139,7 @@ export async function updateProfile(
       desired_roles: input.desiredRoles,
       desired_locations: input.desiredLocations,
       employment_types: input.employmentTypes,
+      favorite_companies: input.favoriteCompanies,
     })
     .eq("id", userId);
 

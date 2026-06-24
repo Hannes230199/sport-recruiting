@@ -16,6 +16,12 @@ const ROLE_SUGGESTIONS = [
   "Sportjournalist", "Social Media Manager", "Vereinsmanager",
 ];
 
+const COMPANY_SUGGESTIONS = [
+  "FC Bayern München", "Borussia Dortmund", "DFB", "DOSB", "DSB",
+  "adidas", "PUMA", "Nike", "Decathlon", "Sport 2000",
+  "SPOBIS", "Sportfive", "Lagardère Sports", "IMG", "Infront",
+];
+
 function parseList(str: string): string[] {
   return str.split(",").map((s) => s.trim()).filter(Boolean);
 }
@@ -34,6 +40,7 @@ interface Props {
 export function OnboardingForm({ defaultName, error }: Props) {
   const [sports, setSports] = useState("");
   const [roles, setRoles] = useState("");
+  const [companies, setCompanies] = useState("");
   const [employmentTypes, setEmploymentTypes] = useState<EmploymentType[]>([]);
 
   function toggleEmployment(type: EmploymentType) {
@@ -47,6 +54,7 @@ export function OnboardingForm({ defaultName, error }: Props) {
       {/* Hidden fields for controlled values */}
       <input type="hidden" name="sports" value={sports} />
       <input type="hidden" name="desiredRoles" value={roles} />
+      <input type="hidden" name="favoriteCompanies" value={companies} />
       {employmentTypes.map((t) => (
         <input key={t} type="hidden" name="employmentTypes" value={t} />
       ))}
@@ -126,6 +134,40 @@ export function OnboardingForm({ defaultName, error }: Props) {
                 }`}
               >
                 {role}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Favorite companies */}
+      <div className="rounded-xl border border-slate-200 bg-white p-5">
+        <label className="mb-1 block text-sm font-semibold text-slate-700">
+          Bei welchen Arbeitgebern möchtest du arbeiten?
+        </label>
+        <p className="mb-3 text-xs text-slate-400">Klick auf einen Vorschlag oder tippe selbst</p>
+        <input
+          type="text"
+          value={companies}
+          onChange={(e) => setCompanies(e.target.value)}
+          placeholder="FC Bayern, adidas, DFB…"
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100"
+        />
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {COMPANY_SUGGESTIONS.map((company) => {
+            const selected = parseList(companies).includes(company);
+            return (
+              <button
+                key={company}
+                type="button"
+                onClick={() => setCompanies((c) => selected ? parseList(c).filter(x => x !== company).join(", ") : addTag(c, company))}
+                className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                  selected
+                    ? "border-brand-400 bg-brand-50 font-semibold text-brand-700"
+                    : "border-slate-200 bg-slate-50 text-slate-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+                }`}
+              >
+                {company}
               </button>
             );
           })}
