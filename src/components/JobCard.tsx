@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EMPLOYMENT_TYPE_LABELS, Job, JOB_SOURCES } from "@/lib/types";
+import { CompanyAvatar } from "./CompanyAvatar";
 
 function sourceLabel(source: Job["source"]): string {
   return JOB_SOURCES.find((s) => s.id === source)?.label ?? source;
@@ -51,21 +52,6 @@ function categoryIcon(category: string | null): string | null {
   return null;
 }
 
-// deterministic bg color from company initial
-const INITIAL_COLORS = [
-  "bg-blue-100 text-blue-700",
-  "bg-violet-100 text-violet-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700",
-  "bg-cyan-100 text-cyan-700",
-  "bg-orange-100 text-orange-700",
-];
-
-function initialColor(name: string): string {
-  const code = name.charCodeAt(0) % INITIAL_COLORS.length;
-  return INITIAL_COLORS[code];
-}
 
 const EMPLOYMENT_TAG_COLOR: Record<string, string> = {
   vollzeit:    "bg-brand-50 text-brand-700",
@@ -81,8 +67,6 @@ export function JobCard({ job, matchScore }: { job: Job; matchScore?: number }) 
   const posted = formatDate(job.postedAt);
   const companyName = job.company ?? "Unbekannt";
   const icon = categoryIcon(job.category);
-  const initial = companyName.charAt(0).toUpperCase();
-  const colorClass = initialColor(companyName);
   const isRecent = job.postedAt
     ? Date.now() - new Date(job.postedAt).getTime() < 7 * 86400000
     : false;
@@ -92,12 +76,8 @@ export function JobCard({ job, matchScore }: { job: Job; matchScore?: number }) 
       href={`/jobs/${job.id}`}
       className="group flex items-center gap-4 border-b border-slate-100 bg-white px-5 py-4 last:border-0 transition-colors hover:bg-slate-50"
     >
-      {/* Category icon or company initial */}
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${icon ? "bg-slate-50" : colorClass + " text-sm font-bold"}`}
-      >
-        {icon ?? initial}
-      </div>
+      {/* Company logo (best-effort) or sport emoji or initial */}
+      <CompanyAvatar company={companyName} icon={icon} />
 
       {/* Main content */}
       <div className="min-w-0 flex-1">
