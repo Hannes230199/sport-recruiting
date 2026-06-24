@@ -154,14 +154,17 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           >
             Filtern
           </button>
-          {hasFilters && (
-            <a
-              href="/jobs"
-              className="rounded-lg border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100"
-            >
-              Reset
-            </a>
-          )}
+          <a
+            href="/jobs"
+            className={`rounded-lg border px-4 py-1.5 text-sm font-semibold transition-colors ${
+              hasFilters
+                ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                : "border-slate-200 bg-white text-slate-300 pointer-events-none"
+            }`}
+            aria-disabled={!hasFilters}
+          >
+            ✕ Filter löschen
+          </a>
         </div>
       </form>
 
