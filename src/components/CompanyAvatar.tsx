@@ -57,37 +57,40 @@ interface CompanyAvatarProps {
 }
 
 export function CompanyAvatar({ company, companyUrl, icon }: CompanyAvatarProps) {
-  const [logoFailed, setLogoFailed] = useState(false);
+  // Start hidden — only reveal once onLoad fires. Avoids broken-image flash
+  // when Clearbit fails before React hydration (onError never fires in that case).
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
-  // Prefer real scraped URL, fall back to guesser
-  const domain = !logoFailed
-    ? (companyUrl ? extractDomain(companyUrl) : guessDomain(company))
-    : null;
+  const domain = companyUrl ? extractDomain(companyUrl) : guessDomain(company);
 
-  if (domain && !logoFailed) {
-    return (
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
+  return (
+    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center">
+      {/* Fallback — always rendered, hidden once logo loads */}
+      {!logoLoaded && (
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${
+            icon ? "bg-slate-50" : `${initialColor(company)} text-sm font-bold`
+          }`}
+        >
+          {icon ?? company.charAt(0).toUpperCase()}
+        </div>
+      )}
+
+      {/* Logo — preloaded invisibly; shown on success */}
+      {domain && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={`https://logo.clearbit.com/${domain}`}
           alt={company}
           width={36}
           height={36}
-          className="h-9 w-9 object-contain"
-          onError={() => setLogoFailed(true)}
+          className={`absolute inset-0 h-10 w-10 rounded-lg border border-slate-100 bg-white object-contain p-0.5 transition-opacity ${
+            logoLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          onLoad={() => setLogoLoaded(true)}
+          onError={() => setLogoLoaded(false)}
         />
-      </div>
-    );
-  }
-
-  // Fallback: sport emoji or colored initial
-  return (
-    <div
-      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${
-        icon ? "bg-slate-50" : `${initialColor(company)} text-sm font-bold`
-      }`}
-    >
-      {icon ?? company.charAt(0).toUpperCase()}
+      )}
     </div>
   );
 }
