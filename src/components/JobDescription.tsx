@@ -36,7 +36,7 @@ export function JobDescription({ description }: { description: string }) {
   const parsed = parseJobDescription(description);
 
   const sections: SectionDef[] = [
-    { title: "Über das Unternehmen", emoji: "🏢", items: parsed.companyInfo, asBullets: false },
+    { title: "Über das Unternehmen", emoji: "🏢", items: parsed.companyInfo.slice(0, 4), asBullets: false },
     { title: "Deine Aufgaben",       emoji: "📋", items: parsed.tasks,       asBullets: true  },
     { title: "Dein Profil",          emoji: "🎯", items: parsed.requirements, asBullets: true  },
     { title: "Weitere Infos",        emoji: "ℹ️", items: parsed.moreInfo,    asBullets: true  },
