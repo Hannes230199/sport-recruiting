@@ -7,6 +7,7 @@ import { getOrCreateProfile } from "@/lib/data/profile";
 import { getApplicationForJob } from "@/lib/data/applications";
 import { scoreJobForCandidate } from "@/lib/matching";
 import { applyToJob } from "./actions";
+import { JobDescription } from "@/components/JobDescription";
 
 interface JobDetailPageProps {
   params: Promise<{ id: string }>;
@@ -81,8 +82,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </div>
         )}
 
-        <div className="mt-6 whitespace-pre-line text-sm leading-relaxed text-slate-700">
-          {job.description}
+        <div className="mt-6">
+          <JobDescription description={job.description} />
         </div>
 
         {job.tags.length > 0 && (
