@@ -90,6 +90,7 @@ export const sportJobScraper: Scraper = {
           sourceUrl,
           title: title || cleanText(link.text()),
           company,
+          companyUrl: null,
           location,
           employmentType: guessEmploymentType(employmentTypeRaw ?? title),
           category: guessCategory(title),

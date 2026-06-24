@@ -87,6 +87,7 @@ export const jobsImSportScraper: Scraper = {
           sourceUrl: href,
           title,
           company,
+          companyUrl: null,
           location,
           employmentType: guessEmploymentType(fullText),
           category: guessCategory(title),

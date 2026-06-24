@@ -9,6 +9,7 @@ export interface JobRow {
   source_url: string;
   title: string;
   company: string | null;
+  company_url: string | null;
   location: string | null;
   employment_type: EmploymentType;
   category: string | null;
@@ -28,6 +29,7 @@ export function rowToJob(row: JobRow): Job {
     sourceUrl: row.source_url,
     title: row.title,
     company: row.company,
+    companyUrl: row.company_url,
     location: row.location,
     employmentType: row.employment_type,
     category: row.category,
@@ -48,7 +50,7 @@ export interface JobFilters {
 }
 
 const JOB_COLUMNS =
-  "id, source, external_id, source_url, title, company, location, employment_type, category, tags, description, salary_range, posted_at, scraped_at, is_active";
+  "id, source, external_id, source_url, title, company, company_url, location, employment_type, category, tags, description, salary_range, posted_at, scraped_at, is_active";
 
 /** Die N zuletzt veröffentlichten aktiven Jobs (für die Startseite). */
 export async function getLatestJobs(supabase: SupabaseClient, limit: number): Promise<Job[]> {

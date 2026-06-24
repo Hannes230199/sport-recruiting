@@ -2,23 +2,29 @@
 
 import { useState } from "react";
 
+/** Extracts the hostname from a URL, or null if unparseable. */
+function extractDomain(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Guesses a company's primary domain from its name.
- * Best-effort: works well for large orgs, gracefully returns null for unknowns.
+ * Best-effort fallback when no scraped company_url is available.
  */
 function guessDomain(company: string): string | null {
   const cleaned = company
     .toLowerCase()
-    // strip legal/sport org suffixes
     .replace(
       /\b(gmbh|ag|e\.v\.|ev|e\.v|kg|se|mbh|co\.|inc|ltd|llc|ug|ohg|& co)\b/gi,
       " "
     )
-    // transliterate German umlauts
     .replace(/[äöüß]/g, (c) =>
       ({ ä: "ae", ö: "oe", ü: "ue", ß: "ss" } as Record<string, string>)[c] ?? c
     )
-    // strip non-alphanumeric except hyphens
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "");
@@ -44,16 +50,20 @@ function initialColor(name: string): string {
 
 interface CompanyAvatarProps {
   company: string;
+  /** Scraped company website URL (preferred over domain guesser) */
+  companyUrl: string | null;
   /** Sport category emoji (already computed by parent) */
   icon: string | null;
 }
 
-export function CompanyAvatar({ company, icon }: CompanyAvatarProps) {
+export function CompanyAvatar({ company, companyUrl, icon }: CompanyAvatarProps) {
   const [logoFailed, setLogoFailed] = useState(false);
 
-  const domain = guessDomain(company);
+  // Prefer real scraped URL, fall back to guesser
+  const domain = !logoFailed
+    ? (companyUrl ? extractDomain(companyUrl) : guessDomain(company))
+    : null;
 
-  // If we have a guessed domain and the logo hasn't failed yet, attempt it
   if (domain && !logoFailed) {
     return (
       <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-white">

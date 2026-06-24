@@ -62,6 +62,7 @@ export function toDbRow(source: string, job: ScrapedJob) {
     source_url: job.sourceUrl,
     title: job.title,
     company: job.company,
+    company_url: job.companyUrl,
     location: job.location,
     employment_type: job.employmentType,
     category: job.category,

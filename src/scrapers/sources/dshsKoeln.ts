@@ -18,6 +18,7 @@ interface ApiTag {
 interface ApiProvider {
   uid: number;
   company: string;
+  website?: string | null;
 }
 
 interface ApiJob {
@@ -115,6 +116,9 @@ export const dshsKoelnScraper: Scraper = {
 
       const description = cleanText(job.description).slice(0, 5000);
       const company = job.provider?.company ? cleanText(job.provider.company) : null;
+      const companyUrl = job.provider?.website
+        ? (job.provider.website.startsWith("http") ? job.provider.website : `https://${job.provider.website}`)
+        : null;
       const location = job.city ? cleanText(job.city) : null;
       const category = job.sectors?.[0]?.name ? cleanText(job.sectors[0].name) : guessCategory(title);
       const employmentRaw = job.employments?.map((e) => e.name).join(" ") ?? "";
@@ -125,6 +129,7 @@ export const dshsKoelnScraper: Scraper = {
         sourceUrl: `${BASE_URL}/jobs/${job.id}/${slugify(title)}/`,
         title,
         company,
+        companyUrl,
         location,
         employmentType: guessEmploymentType(`${employmentRaw} ${title}`),
         category,

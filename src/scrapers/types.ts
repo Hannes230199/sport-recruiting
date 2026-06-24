@@ -9,6 +9,7 @@ export interface ScrapedJob {
   sourceUrl: string;
   title: string;
   company: string | null;
+  companyUrl: string | null; // Website des Unternehmens (für Logo-Lookup)
   location: string | null;
   employmentType: EmploymentType;
   category: string | null;

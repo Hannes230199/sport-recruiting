@@ -48,6 +48,7 @@ export interface Job {
   sourceUrl: string;
   title: string;
   company: string | null;
+  companyUrl: string | null;
   location: string | null;
   employmentType: EmploymentType;
   /** z.B. "Fußball", "Eventmanagement", "Marketing", "Reha & Physio" */

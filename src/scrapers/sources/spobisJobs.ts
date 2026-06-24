@@ -120,6 +120,16 @@ export const spobisJobsScraper: Scraper = {
         const employmentTypeRaw = cleanText(card.find(".home_job_employment_type").first().text()) || null;
         const employmentType = mapEmploymentType(employmentTypeRaw);
         const company = cleanText(card.find(".home-company-link .is_company").first().text()) || null;
+
+        // Try to extract company website from the company link element
+        const companyLinkHref = card.find(".home-company-link").first().attr("href") ?? null;
+        const companyUrl =
+          companyLinkHref &&
+          companyLinkHref.startsWith("http") &&
+          !companyLinkHref.includes("spobis-jobs.com")
+            ? companyLinkHref
+            : null;
+
         const location = readTag($, card, "Ort");
         const category = readTag($, card, "Tätigkeitsbereich");
 
@@ -130,6 +140,7 @@ export const spobisJobsScraper: Scraper = {
           sourceUrl,
           title,
           company,
+          companyUrl,
           location,
           employmentType,
           category: category ?? guessCategory(title),

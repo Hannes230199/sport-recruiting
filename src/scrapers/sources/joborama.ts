@@ -127,6 +127,7 @@ export const joboramaScraper: Scraper = {
         sourceUrl: entry.href,
         title: entry.title,
         company: entry.company,
+        companyUrl: null,
         location: null,
         employmentType: guessEmploymentType(fullText),
         category: entry.category || guessCategory(entry.title),
