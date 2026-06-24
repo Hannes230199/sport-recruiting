@@ -1,7 +1,7 @@
 import { JobCard } from "@/components/JobCard";
 import { EMPLOYMENT_TYPE_LABELS, EmploymentType } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
-import { getJobCategories, getJobLocations, getJobs } from "@/lib/data/jobs";
+import { getJobCategories, getJobs } from "@/lib/data/jobs";
 import { getOrCreateProfile } from "@/lib/data/profile";
 import { scoreJobForCandidate } from "@/lib/matching";
 
@@ -41,9 +41,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     ? await getOrCreateProfile(supabase, authData.user.id, authData.user.email ?? "").catch(() => null)
     : null;
 
-  const [categories, locations, allJobs] = await Promise.all([
+  const [categories, allJobs] = await Promise.all([
     getJobCategories(supabase),
-    getJobLocations(supabase),
     getJobs(supabase, { q, category, location, employmentType }),
   ]);
 
@@ -97,12 +96,13 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">
             Standort
           </label>
-          <select name="location" defaultValue={location} className={selectClass}>
-            <option value="">Alle Standorte</option>
-            {locations.map((loc) => (
-              <option key={loc} value={loc}>{loc}</option>
-            ))}
-          </select>
+          <input
+            name="location"
+            type="text"
+            defaultValue={params.location ?? ""}
+            placeholder="Stadt oder Region…"
+            className="w-40 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-200"
+          />
         </div>
 
         {/* Kategorie */}
