@@ -58,8 +58,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     jobsWithScore = jobsWithScore.filter((j) => (j.score ?? 0) >= minScore);
   }
 
-  // Sort: if logged in, highest score first; otherwise by posted_at (already sorted by DB)
-  if (candidate) {
+  // Sort: by score only when user explicitly filters by minScore, otherwise keep DB date order
+  if (candidate && minScore > 0) {
     jobsWithScore.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
   }
 
