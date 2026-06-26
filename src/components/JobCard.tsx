@@ -92,9 +92,11 @@ export function JobCard({ job, matchScore }: { job: Job; matchScore?: number }) 
           {job.location ? ` · ${job.location}` : ""}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-          <span className={`rounded-full px-2 py-0.5 font-medium ${EMPLOYMENT_TAG_COLOR[job.employmentType]}`}>
-            {EMPLOYMENT_TYPE_LABELS[job.employmentType]}
-          </span>
+          {job.employmentType !== "unbekannt" && (
+            <span className={`rounded-full px-2 py-0.5 font-medium ${EMPLOYMENT_TAG_COLOR[job.employmentType]}`}>
+              {EMPLOYMENT_TYPE_LABELS[job.employmentType]}
+            </span>
+          )}
           {job.category && (
             <span className="rounded-full bg-orange-50 px-2 py-0.5 font-medium text-orange-700">
               {job.category}
