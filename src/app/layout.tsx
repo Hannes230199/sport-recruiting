@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Header } from "@/components/Header";
 import "./globals.css";
 
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-white antialiased">
         <Header />
         <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <Analytics />
         <footer className="mt-16 border-t border-slate-100">
           <div className="mx-auto max-w-6xl px-4 py-5 text-sm text-slate-400">
             SportRecruiting.de – Deine Sport-Jobbörse. Täglich aktualisiert.
