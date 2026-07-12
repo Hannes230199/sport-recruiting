@@ -17,7 +17,6 @@ export default async function HomePage() {
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
             Täglich aktualisiert
           </span>
-          <span className="text-xs text-slate-400">{JOB_SOURCES.length} Quellen</span>
         </div>
 
         <h1 className="max-w-2xl text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
