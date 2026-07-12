@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: "SportRecruiting.de – Jobs & Bewerbungen im Sport",
   description:
     "Sport-Jobs aus mehreren Quellen gebündelt finden, einmal bewerben, automatisch gematcht werden – und alle Bewerbungen im Überblick behalten.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

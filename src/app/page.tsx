@@ -3,6 +3,7 @@ import { JobCard } from "@/components/JobCard";
 import { JOB_SOURCES } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { getLatestJobs } from "@/lib/data/jobs";
+import { CommunitySignupForm } from "@/components/CommunitySignupForm";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -123,6 +124,86 @@ export default async function HomePage() {
               {source.label}
             </a>
           ))}
+        </div>
+      </section>
+
+      {/* Community sign-up */}
+      <section id="community" className="scroll-mt-20">
+        <div className="overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm">
+          <div className="grid lg:grid-cols-2">
+            {/* Left: copy */}
+            <div className="bg-gradient-to-br from-brand-600 to-accent-600 px-8 py-10 text-white">
+              <p className="text-xs font-bold uppercase tracking-widest opacity-70">Community</p>
+              <h2 className="mt-3 text-2xl font-extrabold leading-snug">
+                Werde Teil der Sport-Recruiting Community
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed opacity-80">
+                Erhalte exklusive Job-Tipps, Karriere-News und Networking-Möglichkeiten direkt in
+                dein Postfach — oder tausch dich live in unserer WhatsApp-Gruppe aus.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm">
+                {["📧 Wöchentlicher Job-Newsletter", "💬 WhatsApp-Gruppe mit Sport-Professionals", "🎯 Exklusive Karriere-Tipps"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 opacity-90">
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Right: form */}
+            <div className="px-8 py-10">
+              <CommunitySignupForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Consultation booking */}
+      <section id="beratung" className="scroll-mt-20">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="grid lg:grid-cols-2">
+            {/* Left: copy */}
+            <div className="px-8 py-10">
+              <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Kostenlose Beratung</p>
+              <h2 className="mt-3 text-2xl font-extrabold text-slate-900 leading-snug">
+                Persönliches Karriere-Gespräch buchen
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-500">
+                Du willst in den Sport-Job-Markt einsteigen oder dich neu orientieren?
+                Buch dir 30 Minuten mit uns — kostenlos, unverbindlich, praxisnah.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm text-slate-600">
+                {[
+                  "🗓️ Flexibler Termin per Google Calendar",
+                  "⏱️ 30 Minuten, kostenlos & unverbindlich",
+                  "🎯 Individuelle Karriere-Beratung im Sport",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2">{item}</li>
+                ))}
+              </ul>
+            </div>
+            {/* Right: CTA / Google Calendar embed */}
+            <div className="flex flex-col items-center justify-center bg-slate-50 px-8 py-10 text-center">
+              <div className="mb-6 text-5xl">🗓️</div>
+              <h3 className="text-base font-bold text-slate-900">Termin direkt buchen</h3>
+              <p className="mt-2 text-sm text-slate-500">
+                Wähle einen freien Slot in unserem Kalender — du bekommst sofort eine Bestätigung.
+              </p>
+              {/*
+                SETUP: Replace the href below with your Google Calendar appointment scheduling link.
+                Go to Google Calendar → Create → Appointment schedule → Share.
+                It looks like: https://calendar.google.com/calendar/appointments/schedules/...
+              */}
+              <a
+                href="https://calendar.app.google/NcoHYfp4YLLVFvfv6"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-block rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 px-8 py-3.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
+              >
+                Kostenlosen Termin buchen →
+              </a>
+              <p className="mt-3 text-xs text-slate-400">Öffnet Google Calendar</p>
+            </div>
+          </div>
         </div>
       </section>
     </div>
