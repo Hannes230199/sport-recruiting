@@ -11,6 +11,7 @@
     "scrape:dry": "tsx src/scrapers/runner.ts --dry"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.111.0",
     "@supabase/ssr": "^0.4.0",
     "@supabase/supabase-js": "^2.45.4",
     "@vercel/analytics": "^2.0.1",

@@ -8,6 +8,7 @@ import { getApplicationForJob } from "@/lib/data/applications";
 import { scoreJobForCandidate } from "@/lib/matching";
 import { applyToJob } from "./actions";
 import { JobDescription } from "@/components/JobDescription";
+import { AIApplyHelper } from "@/components/AIApplyHelper";
 
 interface JobDetailPageProps {
   params: Promise<{ id: string }>;
@@ -189,6 +190,12 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </Link>
           )}
         </div>
+
+        {user && (
+          <div>
+            <AIApplyHelper jobId={job.id} />
+          </div>
+        )}
       </aside>
     </div>
   );
