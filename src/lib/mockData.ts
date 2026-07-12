@@ -154,6 +154,7 @@ export const MOCK_CANDIDATE: CandidateProfile = {
     },
   ],
   favoriteCompanies: [],
+  cvText: null,
   isRecruiter: false,
   createdAt: "2026-05-20T09:00:00Z",
   updatedAt: "2026-06-01T10:05:00Z",

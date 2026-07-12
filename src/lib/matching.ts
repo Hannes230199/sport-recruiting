@@ -1,22 +1,22 @@
 import { CandidateProfile, Job, MatchResult } from "./types";
 
 /**
- * Einfache, erklärbare Matching-Logik (Regelbasiert / Keyword-Scoring).
+ * Regelbasiertes Matching mit CV-Text-Unterstützung.
  *
- * Ziel: Ein Score 0-100, der grob widerspiegelt, wie gut ein Job zu einem
- * Kandidatenprofil passt - inkl. nachvollziehbarer Gründe ("reasons"), die
- * im Frontend angezeigt werden können.
- *
- * Diese Funktion ist bewusst simpel gehalten und kann später durch ein
- * Embedding-/LLM-basiertes Matching ersetzt oder ergänzt werden, ohne dass
- * sich die Aufrufer (UI, API-Routen) ändern müssen - solange `MatchResult`
- * als Rückgabetyp erhalten bleibt.
+ * Score 0-100, aufgeteilt auf 6 Dimensionen:
+ *   - Sportart-Match        20 Punkte
+ *   - Rollen-Match          20 Punkte
+ *   - Skill-Overlap         20 Punkte
+ *   - CV-Text-Match         20 Punkte  ← neu: Keywords aus Job im CV gefunden
+ *   - Standort              10 Punkte
+ *   - Anstellungsart        10 Punkte
  */
 
 const WEIGHTS = {
-  sport: 30,
-  role: 25,
-  skillOverlap: 25,
+  sport: 20,
+  role: 20,
+  skillOverlap: 20,
+  cvMatch: 20,
   location: 10,
   employmentType: 10,
 };
@@ -27,14 +27,47 @@ function normalize(value: string): string {
 
 function textContainsAny(text: string, terms: string[]): string[] {
   const normalizedText = normalize(text);
-  return terms.filter((term) => normalizedText.includes(normalize(term)));
+  return terms.filter((term) => term.length > 2 && normalizedText.includes(normalize(term)));
+}
+
+/** Extrahiert bedeutungstragende Keywords aus einem Job für den CV-Abgleich. */
+function extractJobKeywords(job: Job): string[] {
+  const keywords: string[] = [];
+
+  // Titel-Wörter (mind. 4 Zeichen, keine Stopwörter)
+  const STOP = new Set(["und", "oder", "für", "mit", "bei", "der", "die", "das", "eine", "einen", "m/w/d", "w/m/d"]);
+  const titleWords = job.title
+    .split(/[\s/,()\-]+/)
+    .map((w) => w.replace(/[^a-zA-ZäöüÄÖÜß]/g, ""))
+    .filter((w) => w.length >= 4 && !STOP.has(w.toLowerCase()));
+  keywords.push(...titleWords);
+
+  // Kategorie
+  if (job.category) keywords.push(job.category);
+
+  // Tags
+  keywords.push(...job.tags);
+
+  // Top-Keywords aus Beschreibung (häufig vorkommende substantivische Begriffe)
+  // Einfache Heuristik: Großgeschriebene Wörter mit mind. 5 Zeichen
+  const descWords = job.description
+    .split(/\s+/)
+    .filter((w) => w.length >= 5 && /^[A-ZÄÖÜ]/.test(w))
+    .map((w) => w.replace(/[^a-zA-ZäöüÄÖÜß]/g, ""))
+    .filter((w) => w.length >= 5 && !STOP.has(w.toLowerCase()));
+
+  // Dedupliziert, max. 30 Keywords aus Beschreibung
+  const descSet = new Set(descWords);
+  keywords.push(...Array.from(descSet).slice(0, 30));
+
+  return [...new Set(keywords)]; // global dedup
 }
 
 export function scoreJobForCandidate(job: Job, candidate: CandidateProfile): MatchResult {
   let score = 0;
   const reasons: string[] = [];
 
-  // 1. Sportart-Match (im Titel, Kategorie oder Tags)
+  // 1. Sportart-Match (Titel, Kategorie, Tags)
   const haystack = [job.title, job.category ?? "", ...job.tags].join(" ");
   const matchedSports = textContainsAny(haystack, candidate.sports);
   if (matchedSports.length > 0) {
@@ -42,14 +75,14 @@ export function scoreJobForCandidate(job: Job, candidate: CandidateProfile): Mat
     reasons.push(`Sportart-Match: ${matchedSports.join(", ")}`);
   }
 
-  // 2. Rollen-Match (gewünschte Rolle taucht im Jobtitel auf)
+  // 2. Rollen-Match (gewünschte Rolle im Jobtitel)
   const matchedRoles = textContainsAny(job.title, candidate.desiredRoles);
   if (matchedRoles.length > 0) {
     score += WEIGHTS.role;
     reasons.push(`Passende Rolle: ${matchedRoles.join(", ")}`);
   }
 
-  // 3. Skill-Overlap (Skills des Kandidaten vs. Tags/Beschreibung des Jobs)
+  // 3. Skill-Overlap (Skills vs. Tags + Beschreibung)
   const jobText = [job.description, ...job.tags].join(" ");
   const matchedSkills = textContainsAny(jobText, candidate.skills);
   if (matchedSkills.length > 0) {
@@ -58,7 +91,21 @@ export function scoreJobForCandidate(job: Job, candidate: CandidateProfile): Mat
     reasons.push(`Skill-Überlappung: ${matchedSkills.join(", ")}`);
   }
 
-  // 4. Standort-Match (inkl. "Remote")
+  // 4. CV-Text-Match (Job-Keywords im Lebenslauf gefunden)
+  if (candidate.cvText && candidate.cvText.length > 50) {
+    const jobKeywords = extractJobKeywords(job);
+    const matchedInCv = textContainsAny(candidate.cvText, jobKeywords);
+    if (matchedInCv.length > 0) {
+      // Score skaliert mit Trefferquote (max. 20 Punkte)
+      const ratio = matchedInCv.length / Math.max(jobKeywords.length, 1);
+      const cvScore = Math.round(WEIGHTS.cvMatch * Math.min(ratio * 3, 1));
+      score += cvScore;
+      const topMatches = matchedInCv.slice(0, 4).join(", ");
+      reasons.push(`CV-Match: ${topMatches}${matchedInCv.length > 4 ? ` +${matchedInCv.length - 4}` : ""}`);
+    }
+  }
+
+  // 5. Standort-Match
   if (job.location) {
     const normalizedLocation = normalize(job.location);
     const locationMatch = candidate.desiredLocations.some((loc) =>
@@ -70,7 +117,7 @@ export function scoreJobForCandidate(job: Job, candidate: CandidateProfile): Mat
     }
   }
 
-  // 5. Anstellungsart-Match
+  // 6. Anstellungsart-Match
   if (candidate.employmentTypes.includes(job.employmentType)) {
     score += WEIGHTS.employmentType;
     reasons.push(`Anstellungsart passt: ${job.employmentType}`);
@@ -83,12 +130,6 @@ export function scoreJobForCandidate(job: Job, candidate: CandidateProfile): Mat
   };
 }
 
-/**
- * Sortiert eine Liste von Jobs nach Match-Score für einen Kandidaten
- * (absteigend). Jobs mit Score 0 werden nicht ausgeschlossen, damit die
- * Liste vollständig bleibt - das Frontend kann z.B. einen Mindest-Score
- * als Filter anbieten.
- */
 export function rankJobsForCandidate(jobs: Job[], candidate: CandidateProfile): MatchResult[] {
   return jobs
     .map((job) => scoreJobForCandidate(job, candidate))

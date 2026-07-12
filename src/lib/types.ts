@@ -90,6 +90,8 @@ export interface CandidateProfile {
   employmentTypes: EmploymentType[];
   /** Wunscharbeitgeber, z.B. ["FC Bayern München", "DFB"] */
   favoriteCompanies: string[];
+  /** Extrahierter Plaintext aus dem hochgeladenen Lebenslauf (PDF) */
+  cvText: string | null;
   documents: CandidateDocument[];
   isRecruiter: boolean;
   createdAt: string;

@@ -14,6 +14,7 @@ interface ProfileRow {
   desired_locations: string[] | null;
   employment_types: EmploymentType[] | null;
   favorite_companies: string[] | null;
+  cv_text: string | null;
   is_recruiter: boolean | null;
   created_at: string;
   updated_at: string;
@@ -29,7 +30,7 @@ interface DocumentRow {
 }
 
 const PROFILE_COLUMNS =
-  "id, full_name, email, phone, location, bio, skills, sports, desired_roles, desired_locations, employment_types, favorite_companies, is_recruiter, created_at, updated_at";
+  "id, full_name, email, phone, location, bio, skills, sports, desired_roles, desired_locations, employment_types, favorite_companies, cv_text, is_recruiter, created_at, updated_at";
 
 function rowToProfile(row: ProfileRow, documents: CandidateDocument[]): CandidateProfile {
   return {
@@ -45,6 +46,7 @@ function rowToProfile(row: ProfileRow, documents: CandidateDocument[]): Candidat
     desiredLocations: row.desired_locations ?? [],
     employmentTypes: row.employment_types ?? [],
     favoriteCompanies: row.favorite_companies ?? [],
+    cvText: row.cv_text ?? null,
     documents,
     isRecruiter: row.is_recruiter ?? false,
     createdAt: row.created_at,
@@ -220,10 +222,28 @@ export async function uploadCandidateDocument(
   });
 
   if (insertError) {
-    // Aufräumen, falls der DB-Eintrag fehlschlägt, damit kein "verwaistes"
-    // Storage-Objekt zurückbleibt.
     await supabase.storage.from("candidate-documents").remove([storagePath]);
     throw new Error(`Dokument konnte nicht gespeichert werden: ${insertError.message}`);
+  }
+
+  // Extract text from CV PDF and store for matching
+  if (type === "cv" && file.type === "application/pdf") {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfParseModule = await import("pdf-parse") as any;
+      const pdfParse = pdfParseModule.default ?? pdfParseModule;
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const parsed = await pdfParse(buffer);
+      const cvText = parsed.text.slice(0, 20000); // cap at 20k chars
+      await supabase
+        .from("candidate_profiles")
+        .update({ cv_text: cvText })
+        .eq("id", candidateId);
+    } catch (err) {
+      // Non-fatal: matching still works without CV text
+      console.warn("CV text extraction failed:", err);
+    }
   }
 }
 
