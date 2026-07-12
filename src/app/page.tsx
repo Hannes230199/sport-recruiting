@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { JobCard } from "@/components/JobCard";
-import { JOB_SOURCES } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { getLatestJobs } from "@/lib/data/jobs";
 import { CommunitySignupForm } from "@/components/CommunitySignupForm";
@@ -108,24 +107,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Sources */}
-      <section>
-        <h2 className="mb-1 text-lg font-bold text-slate-900">Unsere Quellen</h2>
-        <p className="mb-5 text-sm text-slate-400">Täglich aktualisiert</p>
-        <div className="flex flex-wrap gap-2">
-          {JOB_SOURCES.map((source) => (
-            <a
-              key={source.id}
-              href={source.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700"
-            >
-              {source.label}
-            </a>
-          ))}
-        </div>
-      </section>
 
       {/* Community sign-up */}
       <section id="community" className="scroll-mt-20">
