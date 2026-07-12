@@ -83,8 +83,10 @@ Nur das JSON, kein Markdown, keine Erklärungen.`;
       messages: [{ role: "user", content: prompt }],
     });
 
-    const text = message.content[0].type === "text" ? message.content[0].text : "";
-    const data: AIApplyResult = JSON.parse(text.trim());
+    const raw = message.content[0].type === "text" ? message.content[0].text : "";
+    // Strip markdown code fences if present (```json ... ```)
+    const text = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+    const data: AIApplyResult = JSON.parse(text);
 
     return { success: true, data };
   } catch (err) {
