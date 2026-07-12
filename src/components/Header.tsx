@@ -19,10 +19,15 @@ export async function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1.5">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
-            <circle cx="10" cy="10" r="10" className="fill-brand-600" />
-            <path d="M6 14L10 6l4 8" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M7.5 11h5" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+          <svg width="24" height="24" viewBox="0 0 100 100" className="shrink-0">
+            <rect width="100" height="100" rx="22" fill="#1d4ed8"/>
+            <circle cx="50" cy="50" r="32" fill="none" stroke="white" strokeWidth="2.5" opacity="0.45"/>
+            <polygon points="50,37 62,46 57,60 43,60 38,46" fill="white"/>
+            <line x1="50" y1="37" x2="50" y2="18" stroke="white" strokeWidth="2" opacity="0.5"/>
+            <line x1="62" y1="46" x2="78" y2="39" stroke="white" strokeWidth="2" opacity="0.5"/>
+            <line x1="57" y1="60" x2="67" y2="76" stroke="white" strokeWidth="2" opacity="0.5"/>
+            <line x1="43" y1="60" x2="33" y2="76" stroke="white" strokeWidth="2" opacity="0.5"/>
+            <line x1="38" y1="46" x2="22" y2="39" stroke="white" strokeWidth="2" opacity="0.5"/>
           </svg>
           <span className="text-base font-bold tracking-tight text-slate-900">
             SportRecruiting<span className="text-slate-400 font-normal">.de</span>
