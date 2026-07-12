@@ -12,7 +12,8 @@ export type JobSource =
   | "dshs_koeln"
   | "spobis_jobs"
   | "sport_job"
-  | "joborama";
+  | "joborama"
+  | "direct";
 
 export const JOB_SOURCES: { id: JobSource; label: string; url: string }[] = [
   { id: "jobsimsport", label: "JobsImSport.de", url: "https://jobsimsport.de/" },

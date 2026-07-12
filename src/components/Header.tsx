@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { href: "/jobs", label: "Jobs" },
   { href: "/profil", label: "Profil" },
   { href: "/bewerbungen", label: "Bewerbungen" },
+  { href: "/unternehmen", label: "Stelle ausschreiben" },
 ];
 
 export async function Header() {

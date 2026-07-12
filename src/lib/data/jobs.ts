@@ -59,6 +59,7 @@ export async function getLatestJobs(supabase: SupabaseClient, limit: number): Pr
     .from("jobs")
     .select(JOB_COLUMNS)
     .eq("is_active", true)
+    .eq("is_approved", true)
     .order("posted_at", { ascending: false, nullsFirst: false })
     .limit(limit);
 
@@ -75,7 +76,7 @@ export async function getLatestJobs(supabase: SupabaseClient, limit: number): Pr
  * Anstellungsart), sortiert nach Veröffentlichungsdatum (neueste zuerst).
  */
 export async function getJobs(supabase: SupabaseClient, filters: JobFilters): Promise<Job[]> {
-  let query = supabase.from("jobs").select(JOB_COLUMNS).eq("is_active", true);
+  let query = supabase.from("jobs").select(JOB_COLUMNS).eq("is_active", true).eq("is_approved", true);
 
   if (filters.source) {
     query = query.eq("source", filters.source);
