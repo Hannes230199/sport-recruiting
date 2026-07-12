@@ -229,9 +229,9 @@ export async function uploadCandidateDocument(
   // Extract text from CV PDF and store for matching
   if (type === "cv" && file.type === "application/pdf") {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pdfParseModule = await import("pdf-parse") as any;
-      const pdfParse = pdfParseModule.default ?? pdfParseModule;
+      type PdfParseFn = (buf: Buffer) => Promise<{ text: string }>;
+      const mod = (await import("pdf-parse")) as unknown as { default?: PdfParseFn } & PdfParseFn;
+      const pdfParse: PdfParseFn = mod.default ?? mod;
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const parsed = await pdfParse(buffer);
