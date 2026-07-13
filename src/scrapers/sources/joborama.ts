@@ -25,7 +25,7 @@ const CATEGORIES: { label: string; path: string }[] = [
   { label: "Tourismus & Gastgewerbe", path: "/stellenangebote/tourismus-gastgewerbe" },
 ];
 
-const MAX_PAGES_PER_CATEGORY = 20;
+const MAX_PAGES_PER_CATEGORY = 5; // ~100 jobs/category, newest first
 
 async function fetchHtml(url: string): Promise<string | null> {
   try {
@@ -102,9 +102,11 @@ export const joboramaScraper: Scraper = {
   async scrape(limit) {
     const allEntries: RawEntry[] = [];
 
-    for (const cat of CATEGORIES) {
-      if (typeof limit === "number" && allEntries.length >= limit) break;
-      const catEntries = await scrapeCategory(cat.path, cat.label, limit);
+    // Scrape all 4 categories in parallel to stay within Vercel's timeout
+    const results = await Promise.all(
+      CATEGORIES.map((cat) => scrapeCategory(cat.path, cat.label, limit))
+    );
+    for (const catEntries of results) {
       allEntries.push(...catEntries);
     }
 

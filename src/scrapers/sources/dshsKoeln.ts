@@ -53,27 +53,25 @@ async function fetchPage(page: number): Promise<ApiResponse> {
   return (await res.json()) as ApiResponse;
 }
 
+// Fetch only the most recent N pages (sorted DESC by default).
+// Daily cron only needs new jobs — 5 pages × 50 = 250 newest listings.
+const MAX_PAGES = 5;
+
 async function fetchAllJobs(): Promise<ApiJob[]> {
   const first = await fetchPage(1);
-  const totalPages = first.meta?.totalPages ?? 1;
+  const totalPages = Math.min(first.meta?.totalPages ?? 1, MAX_PAGES);
 
-  // Fetch all remaining pages in parallel batches to stay within timeout
-  const BATCH = 15;
-  const allJobs: ApiJob[] = [...(first.data ?? [])];
+  // Fetch remaining pages in parallel
+  const rest = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, i) =>
+      fetchPage(i + 2).catch(() => null)
+    )
+  );
 
-  for (let start = 2; start <= totalPages; start += BATCH) {
-    const end = Math.min(start + BATCH - 1, totalPages);
-    const responses = await Promise.all(
-      Array.from({ length: end - start + 1 }, (_, i) =>
-        fetchPage(start + i).catch(() => null)
-      )
-    );
-    for (const res of responses) {
-      if (res) allJobs.push(...(res.data ?? []));
-    }
-  }
-
-  return allJobs;
+  return [
+    ...(first.data ?? []),
+    ...rest.flatMap((r) => r?.data ?? []),
+  ];
 }
 
 /**
