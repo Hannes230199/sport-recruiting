@@ -59,8 +59,7 @@ async function scrapeCategory(
     page++;
 
     const html = await fetchHtml(nextUrl);
-    console.log(`[joborama] ${nextUrl} → ${html ? html.length + ' chars' : 'null'}`);
-    if (!html) break;
+if (!html) break;
 
     const $ = cheerio.load(html);
     let foundNew = false;
@@ -81,8 +80,7 @@ async function scrapeCategory(
       foundNew = true;
     });
 
-    console.log(`[joborama] found ${entries.length} entries, foundNew=${foundNew}`);
-    if (!foundNew) break;
+if (!foundNew) break;
 
     // Follow a.next-page for path-based pagination (/category/2, /category/3, …)
     const nextHref = $("a.next-page").first().attr("href");
