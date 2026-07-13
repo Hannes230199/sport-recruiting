@@ -54,16 +54,23 @@ async function fetchPage(page: number): Promise<ApiResponse> {
 }
 
 async function fetchAllJobs(): Promise<ApiJob[]> {
-  const allJobs: ApiJob[] = [];
   const first = await fetchPage(1);
-  allJobs.push(...(first.data ?? []));
-
   const totalPages = first.meta?.totalPages ?? 1;
-  for (let page = 2; page <= totalPages; page++) {
-    const response = await fetchPage(page);
-    const items = response.data ?? [];
-    if (items.length === 0) break;
-    allJobs.push(...items);
+
+  // Fetch all remaining pages in parallel batches to stay within timeout
+  const BATCH = 15;
+  const allJobs: ApiJob[] = [...(first.data ?? [])];
+
+  for (let start = 2; start <= totalPages; start += BATCH) {
+    const end = Math.min(start + BATCH - 1, totalPages);
+    const responses = await Promise.all(
+      Array.from({ length: end - start + 1 }, (_, i) =>
+        fetchPage(start + i).catch(() => null)
+      )
+    );
+    for (const res of responses) {
+      if (res) allJobs.push(...(res.data ?? []));
+    }
   }
 
   return allJobs;

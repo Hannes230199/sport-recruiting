@@ -1,5 +1,4 @@
 import * as cheerio from "cheerio";
-import type { Element } from "domhandler";
 import { EmploymentType } from "@/lib/types";
 import { Scraper, ScrapedJob } from "../types";
 import { cleanText, extractTags, guessCategory } from "../normalize";
@@ -21,7 +20,6 @@ async function fetchHtml(url: string): Promise<string | null> {
   }
 }
 
-// Reihenfolge wichtig: "Werkstudent" vor "Studen..." prüfen etc.
 const EMPLOYMENT_TYPE_LABELS: { label: string; type: EmploymentType }[] = [
   { label: "Werkstudent", type: "werkstudent" },
   { label: "Vollzeit", type: "vollzeit" },
@@ -32,10 +30,6 @@ const EMPLOYMENT_TYPE_LABELS: { label: string; type: EmploymentType }[] = [
   { label: "Minijob", type: "teilzeit" },
 ];
 
-/**
- * Versucht aus dem Freitext einer `.home_job_employment_type`-Badge die
- * passende `EmploymentType` zu ermitteln (z.B. "Vollzeit", "Werkstudent").
- */
 function mapEmploymentType(raw: string | null): EmploymentType {
   if (!raw) return "unbekannt";
   for (const { label, type } of EMPLOYMENT_TYPE_LABELS) {
@@ -45,31 +39,14 @@ function mapEmploymentType(raw: string | null): EmploymentType {
 }
 
 /**
- * Liest aus den `.tags_wrapper .tags_list-item`-Elementen einer Jobkarte den
- * Wert für ein bestimmtes Label (z.B. "Ort" oder "Tätigkeitsbereich"). Jedes
- * Tag-Item enthält ein Label (`.job-card-label p`) und einen Wert
- * (`.text-primary-label`).
- */
-function readTag($: cheerio.CheerioAPI, card: cheerio.Cheerio<Element>, label: string): string | null {
-  let value: string | null = null;
-  card.find(".tags_wrapper .tags_list-item").each((_, item) => {
-    if (value) return;
-    const $item = $(item);
-    if ($item.hasClass("hidden")) return;
-    const itemLabel = cleanText($item.find(".job-card-label p").first().text());
-    if (itemLabel.toLowerCase() === label.toLowerCase()) {
-      value = cleanText($item.find(".text-primary-label").first().text()) || null;
-    }
-  });
-  return value;
-}
-
-/**
- * SPOBIS Jobs ist eine Webflow-Seite mit CMS-Collection-Listen. Jede
- * Jobkarte ist ein `a.job_card` (bzw. `a[href^="/jobs/"]`) mit klar
- * benannten Kind-Elementen: Titel in `.home_job_title`, Anstellungsart in
- * `.home_job_employment_type`, Firma in `.home-company-link .is_company`
- * und Ort/Tätigkeitsbereich als Tag-Items in `.tags_wrapper`.
+ * SPOBIS Jobs ist eine Webflow-CMS-Seite.
+ *
+ * Früher: /jobs?page=N (URL existierte nicht) + .home_job_card-Selektor.
+ *
+ * Aktuell (2026-07): Homepage mit Webflow-Pagination ?1c8361bc_page=N.
+ * Jobkarte ist a.job_card (oder a[href^="/jobs/"]), Titel in h2.home_job_title,
+ * Anstellungsart in .home_job_employment_type.
+ * Firma/Ort/Tags werden nicht mehr in der Listing-Ansicht angezeigt.
  */
 export const spobisJobsScraper: Scraper = {
   source: "spobis_jobs",
@@ -80,25 +57,14 @@ export const spobisJobsScraper: Scraper = {
     const jobs: ScrapedJob[] = [];
     const seen = new Set<string>();
 
-    // Try paginated job list first (/jobs?page=N), fall back to homepage
-    const urls: string[] = [];
     for (let page = 1; page <= MAX_PAGES; page++) {
-      urls.push(page === 1 ? `${BASE_URL}/jobs` : `${BASE_URL}/jobs?page=${page}`);
-    }
-    urls.push(`${BASE_URL}/`); // homepage as fallback
-
-    let anyFound = false;
-
-    for (const url of urls) {
       if (typeof limit === "number" && jobs.length >= limit) break;
-      // Skip pagination pages if the /jobs listing found nothing (homepage mode)
-      if (anyFound && url === `${BASE_URL}/`) break;
+
+      const url =
+        page === 1 ? `${BASE_URL}/` : `${BASE_URL}/?1c8361bc_page=${page}`;
 
       const html = await fetchHtml(url);
-      if (!html) {
-        if (url.includes("?page=")) break; // pagination exhausted
-        continue;
-      }
+      if (!html) break;
 
       const $ = cheerio.load(html);
       const before = jobs.length;
@@ -117,43 +83,29 @@ export const spobisJobsScraper: Scraper = {
 
         seen.add(sourceUrl);
 
-        const employmentTypeRaw = cleanText(card.find(".home_job_employment_type").first().text()) || null;
-        const employmentType = mapEmploymentType(employmentTypeRaw);
-        const company = cleanText(card.find(".home-company-link .is_company").first().text()) || null;
+        const employmentTypeRaw =
+          cleanText(card.find(".home_job_employment_type").first().text()) || null;
 
-        // Try to extract company website from the company link element
-        const companyLinkHref = card.find(".home-company-link").first().attr("href") ?? null;
-        const companyUrl =
-          companyLinkHref &&
-          companyLinkHref.startsWith("http") &&
-          !companyLinkHref.includes("spobis-jobs.com")
-            ? companyLinkHref
-            : null;
-
-        const location = readTag($, card, "Ort");
-        const category = readTag($, card, "Tätigkeitsbereich");
-
-        const fullText = `${title} ${employmentTypeRaw ?? ""} ${category ?? ""}`;
+        const fullText = `${title} ${employmentTypeRaw ?? ""}`;
 
         jobs.push({
           externalId: sourceUrl.replace(/\/+$/, "").split("/").pop() ?? sourceUrl,
           sourceUrl,
           title,
-          company,
-          companyUrl,
-          location,
-          employmentType,
-          category: category ?? guessCategory(title),
+          company: null,
+          companyUrl: null,
+          location: null,
+          employmentType: mapEmploymentType(employmentTypeRaw),
+          category: guessCategory(title),
           tags: extractTags(fullText),
-          description: cleanText(card.text()),
+          description: "",
           salaryRange: null,
           postedAt: null,
         });
       });
 
-      const found = jobs.length - before;
-      if (found > 0) anyFound = true;
-      if (found === 0 && url.includes("?page=")) break; // empty paginated page → done
+      // No new jobs on this page → pagination exhausted
+      if (jobs.length === before) break;
     }
 
     return jobs;
