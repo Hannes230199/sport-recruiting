@@ -59,6 +59,7 @@ const MAX_PAGES = 5;
 
 async function fetchAllJobs(): Promise<ApiJob[]> {
   const first = await fetchPage(1);
+  console.log(`[dshs] page1: ${first.data?.length ?? 0} jobs, totalPages: ${first.meta?.totalPages}`);
   const totalPages = Math.min(first.meta?.totalPages ?? 1, MAX_PAGES);
 
   // Fetch remaining pages in parallel
