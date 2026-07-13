@@ -44,7 +44,10 @@ export async function GET(request: NextRequest) {
   const limit = limitParam ? Number(limitParam) : undefined;
 
   const results = await runScrapers(SCRAPERS, limit && !Number.isNaN(limit) ? limit : undefined);
+  console.log("[scrape] jobs per source:", results.map((r) => `${r.source}:${r.jobs.length}${r.error ? "(ERR:" + r.error + ")" : ""}`).join(", "));
+
   const summary = await upsertJobs(results);
+  console.log("[scrape] upsert summary:", summary.map((s) => `${s.source}:${s.upsertedCount ?? "ERR"}${s.error ? "(ERR:" + s.error + ")" : ""}`).join(", "));
 
   const totalJobs = results.reduce((sum, r) => sum + r.jobs.length, 0);
   const hasErrors = summary.some((s) => s.error);
