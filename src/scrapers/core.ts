@@ -110,7 +110,18 @@ export async function upsertJobs(results: SourceResult[]): Promise<UpsertSummary
       continue;
     }
 
-    const rows = result.jobs.map((job) => toDbRow(result.source, job));
+    const allRows = result.jobs.map((job) => toDbRow(result.source, job));
+
+    // Deduplicate by external_id within the batch — Postgres throws
+    // "ON CONFLICT DO UPDATE command cannot affect row a second time"
+    // when the same (source, external_id) appears more than once.
+    const seenIds = new Set<string>();
+    const rows = allRows.filter((row) => {
+      const key = String(row.external_id ?? row.source_url);
+      if (seenIds.has(key)) return false;
+      seenIds.add(key);
+      return true;
+    });
 
     const { error, count } = await supabase
       .from("jobs")
