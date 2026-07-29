@@ -70,7 +70,8 @@ export function JobCard({ job, matchScore }: { job: Job; matchScore?: number }) 
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="group flex items-center gap-4 border-b border-slate-100 bg-white px-5 py-4 last:border-0 transition-colors hover:bg-slate-50"
+      className="group flex items-center gap-4 border-b border-white/60 px-5 py-4 last:border-0 transition-colors hover:bg-white/40"
+      style={{ background: "rgba(255,255,255,0.55)" }}
     >
       {/* Company logo (best-effort) or sport emoji or initial */}
       <CompanyAvatar company={companyName} companyUrl={job.companyUrl} icon={icon} />

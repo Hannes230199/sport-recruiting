@@ -155,7 +155,7 @@ export default async function HomePage() {
                 <p className="mt-1 text-slate-400">Die Jobs werden täglich automatisch importiert.</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+              <div className="overflow-hidden rounded-xl border border-white/70" style={{ backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", background: "rgba(255,255,255,0.45)" }}>
                 {latestJobs.map((job) => (
                   <JobCard key={job.id} job={job} />
                 ))}

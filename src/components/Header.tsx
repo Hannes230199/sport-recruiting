@@ -16,7 +16,7 @@ export async function Header() {
   const showRecruiterLink = user ? await isRecruiter(supabase, user.id) : false;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-100 bg-white">
+    <header className="sticky top-0 z-40 border-b border-white/20" style={{ backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", background: "rgba(255,255,255,0.72)" }}>
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1.5">
