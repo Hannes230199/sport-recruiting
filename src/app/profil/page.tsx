@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageContainer } from "@/components/PageContainer";
 import { JobCard } from "@/components/JobCard";
 import { EMPLOYMENT_TYPE_LABELS, EmploymentType, DocumentType } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
@@ -41,7 +42,8 @@ export default async function ProfilPage({ searchParams }: ProfilPageProps) {
   const matches = rankJobsForCandidate(allJobs, candidate).filter((m) => m.score > 0);
 
   return (
-    <div className="space-y-8">
+<PageContainer>
+  <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Mein Profil</h1>
         <p className="mt-1 text-sm text-slate-500">

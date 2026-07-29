@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageContainer } from "@/components/PageContainer";
 import { signUp } from "./actions";
 
 interface SignupPageProps {
@@ -9,7 +10,8 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   const { error } = await searchParams;
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
+<PageContainer>
+  <div className="flex min-h-[60vh] items-center justify-center">
       <div className="w-full max-w-md">
         <div className="h-1.5 w-full rounded-t-2xl bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600" />
         <div className="rounded-b-2xl border border-t-0 border-slate-200 bg-white p-8 shadow-sm">

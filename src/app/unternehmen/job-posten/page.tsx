@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageContainer } from "@/components/PageContainer";
 import { createClient } from "@/lib/supabase/server";
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/types";
 import { postJob } from "../actions";
@@ -25,7 +26,8 @@ export default async function PostJobPage() {
   if (!company) redirect("/unternehmen/registrieren");
 
   return (
-    <div className="mx-auto max-w-2xl">
+<PageContainer>
+  <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Schritt 2 von 2</p>
         <h1 className="mt-2 text-2xl font-extrabold text-slate-900">Stelle ausschreiben</h1>

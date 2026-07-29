@@ -21,3 +21,60 @@ body {
     @apply transition-colors duration-150;
   }
 }
+
+/* Hero blob animations */
+@keyframes blob-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -40px) scale(1.08); }
+}
+@keyframes blob-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-25px, 35px) scale(0.94); }
+}
+@keyframes blob-float-3 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(20px, -20px); }
+  66% { transform: translate(-15px, 15px); }
+}
+@keyframes icon-float-1 {
+  0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+  50% { transform: translate(16px, -22px) rotate(5deg); }
+}
+@keyframes icon-float-2 {
+  0%, 100% { transform: translate(0, 0) rotate(3deg); }
+  50% { transform: translate(-14px, 18px) rotate(-4deg); }
+}
+@keyframes icon-float-3 {
+  0%, 100% { transform: translate(0, 0) rotate(-8deg); }
+  40% { transform: translate(12px, -12px) rotate(4deg); }
+  80% { transform: translate(-8px, 10px) rotate(-2deg); }
+}
+@keyframes scroll-dot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+.animate-blob-1 { animation: blob-float-1 14s ease-in-out infinite; }
+.animate-blob-2 { animation: blob-float-2 17s ease-in-out infinite; }
+.animate-blob-3 { animation: blob-float-3 11s ease-in-out 2s infinite; }
+.animate-blob-4 { animation: blob-float-1 13s ease-in-out 4s infinite; }
+.animate-icon-1 { animation: icon-float-1 9s ease-in-out infinite; }
+.animate-icon-2 { animation: icon-float-2 11s ease-in-out 2s infinite; }
+.animate-icon-3 { animation: icon-float-3 8s ease-in-out 1s infinite; }
+.animate-icon-4 { animation: icon-float-2 12s ease-in-out 3s infinite; }
+.animate-icon-5 { animation: icon-float-1 10s ease-in-out 1.5s infinite; }
+.animate-scroll-dot { animation: scroll-dot 1.4s ease-in-out infinite; }
+
+.glass-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-nav {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+}

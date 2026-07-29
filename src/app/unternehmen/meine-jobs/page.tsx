@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageContainer } from "@/components/PageContainer";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { EMPLOYMENT_TYPE_LABELS, EmploymentType } from "@/lib/types";
@@ -28,7 +29,8 @@ export default async function MeineJobsPage() {
     .order("posted_at", { ascending: false });
 
   return (
-    <div className="space-y-6">
+<PageContainer>
+  <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Meine Stellenanzeigen</h1>

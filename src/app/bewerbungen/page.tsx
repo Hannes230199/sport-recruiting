@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageContainer } from "@/components/PageContainer";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getApplications } from "@/lib/data/applications";
@@ -14,7 +15,8 @@ export default async function BewerbungenPage() {
   const applications = await getApplications(supabase, user.id);
 
   return (
-    <div className="space-y-6">
+<PageContainer>
+  <div className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Meine Bewerbungen</h1>

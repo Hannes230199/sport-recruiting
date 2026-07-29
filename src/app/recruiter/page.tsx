@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageContainer } from "@/components/PageContainer";
 import { redirect } from "next/navigation";
 import { APPLICATION_STATUS_LABELS, ApplicationStatus } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
@@ -41,7 +42,8 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
 
   if (!profile.isRecruiter) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-brand-100 bg-white p-8 text-center shadow-sm">
+<PageContainer>
+  <div className="mx-auto max-w-md rounded-2xl border border-brand-100 bg-white p-8 text-center shadow-sm">
         <p className="text-3xl">🔒</p>
         <h1 className="mt-3 text-lg font-bold text-slate-900">Kein Zugriff</h1>
         <p className="mt-2 text-sm text-slate-500">

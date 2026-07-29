@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageContainer } from "@/components/PageContainer";
 import { notFound } from "next/navigation";
 import { APPLICATION_STATUS_LABELS, EMPLOYMENT_TYPE_LABELS, JOB_SOURCES } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
@@ -47,7 +48,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const posted = formatDate(job.postedAt);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+<PageContainer>
+  <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
       <article className="rounded-2xl border border-brand-100 bg-white p-8 shadow-sm">
         <Link
           href="/jobs"

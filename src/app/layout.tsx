@@ -21,9 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className="min-h-screen bg-white antialiased">
+      <body className="min-h-screen bg-white antialiased overflow-x-hidden">
         <Header />
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main>{children}</main>
         <Analytics />
         <footer className="mt-16 border-t border-slate-100">
           <div className="mx-auto max-w-6xl px-4 py-5 text-sm text-slate-400">

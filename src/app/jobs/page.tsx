@@ -1,4 +1,5 @@
 import { JobCard } from "@/components/JobCard";
+import { PageContainer } from "@/components/PageContainer";
 import { EMPLOYMENT_TYPE_LABELS, EmploymentType } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { getJobCategories, getJobs } from "@/lib/data/jobs";
@@ -66,7 +67,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   const hasFilters = q || category || location || employmentType || minScore > 0;
 
   return (
-    <div className="space-y-6">
+<PageContainer>
+  <div className="space-y-6">
       {/* Page header */}
       <div className="flex items-baseline justify-between">
         <div>
