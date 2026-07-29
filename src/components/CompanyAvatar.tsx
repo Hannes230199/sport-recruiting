@@ -58,7 +58,8 @@ interface CompanyAvatarProps {
 export function CompanyAvatar({ company, companyUrl, icon, dark = false }: CompanyAvatarProps) {
   const [logoLoaded, setLogoLoaded] = useState(false);
 
-  const domain = companyUrl ? extractDomain(companyUrl) : guessDomain(company);
+  // Only use confirmed scraped URL — never guess, to avoid wrong logos
+  const domain = companyUrl ? extractDomain(companyUrl) : null;
 
   return (
     <div className="relative flex h-10 w-10 shrink-0 items-center justify-center">

@@ -10,6 +10,7 @@ import { sportJobScraper } from "./sources/sportJob";
 import { spobisJobsScraper } from "./sources/spobisJobs";
 import { joboramaScraper } from "./sources/joborama";
 import { dshsKoelnScraper } from "./sources/dshsKoeln";
+import { enrichCompanyUrls } from "./enricher";
 
 export const SCRAPERS: Scraper[] = [
   jobsImSportScraper,
@@ -44,7 +45,7 @@ export async function runScrapers(
     scrapers.map((scraper) => scraper.scrape(limit))
   );
 
-  return settled.map((result, i) => {
+  const sourceResults = settled.map((result, i) => {
     const scraper = scrapers[i];
     if (result.status === "fulfilled") {
       return { source: scraper.source, label: scraper.label, jobs: result.value, error: null };
@@ -52,6 +53,19 @@ export async function runScrapers(
     const message = result.reason instanceof Error ? result.reason.message : String(result.reason);
     return { source: scraper.source, label: scraper.label, jobs: [], error: message };
   });
+
+  // Enrich company URLs for sources that don't provide them natively.
+  // Runs best-effort (errors are swallowed) so a slow detail page never
+  // blocks the upsert.
+  await Promise.all(
+    sourceResults
+      .filter((r) => r.source !== "dshs_koeln" && r.jobs.length > 0)
+      .map((r) =>
+        enrichCompanyUrls(r.jobs, 4).catch(() => r.jobs)
+      )
+  );
+
+  return sourceResults;
 }
 
 /** Wandelt ein ScrapedJob (camelCase) in eine DB-Zeile (snake_case) um. */
