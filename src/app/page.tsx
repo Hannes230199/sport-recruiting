@@ -77,12 +77,6 @@ export default async function HomePage() {
                   Dein Job<br />im Sport.
                 </h1>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2 text-white/40">
-                    <div className="flex h-7 w-[18px] items-start justify-center rounded-full border border-white/28 pt-[5px]">
-                      <div className="animate-scroll-dot h-1.5 w-0.5 rounded-full bg-white/50" />
-                    </div>
-                    <span className="text-xs font-medium">Scroll down</span>
-                  </div>
                   <Link
                     href="/jobs"
                     className="rounded-full bg-green-500 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-green-400"
@@ -122,35 +116,43 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── JOBS GRADIENT SECTION ────────────────────────── */}
+      <section className="relative w-screen overflow-hidden py-14">
+        {/* Gradient background matching the mockup */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #1a4a2e 0%, #166534 20%, #0f766e 50%, #0369a1 80%, #1e3a5f 100%)" }} />
+        {/* Subtle blob overlays */}
+        <div className="pointer-events-none absolute rounded-full" style={{ width: 500, height: 500, background: "rgba(34,197,94,0.2)", filter: "blur(80px)", top: -100, left: -80 }} />
+        <div className="pointer-events-none absolute rounded-full" style={{ width: 400, height: 400, background: "rgba(56,189,248,0.18)", filter: "blur(70px)", bottom: -80, right: -60 }} />
+
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white">Neueste Stellenangebote</h2>
+              <p className="text-sm text-white/50">Frisch aus unseren Quellen</p>
+            </div>
+            <Link href="/jobs" className="rounded-full border border-white/30 px-4 py-1.5 text-sm font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white">
+              Alle Jobs →
+            </Link>
+          </div>
+
+          {latestJobs.length === 0 ? (
+            <div className="rounded-2xl border border-white/20 p-8 text-center text-sm text-white/60" style={{ backdropFilter: "blur(16px)", background: "rgba(255,255,255,0.08)" }}>
+              <p className="text-2xl">🏃</p>
+              <p className="mt-2 font-medium text-white/80">Noch keine Stellenangebote vorhanden.</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-white/20" style={{ backdropFilter: "blur(20px)", background: "rgba(255,255,255,0.10)" }}>
+              {latestJobs.map((job) => (
+                <JobCard key={job.id} job={job} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ── CONTENT (contained) ──────────────────────────── */}
       <PageContainer>
         <div className="space-y-14">
-
-          {/* Latest Jobs */}
-          <section>
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">Neueste Stellenangebote</h2>
-                <p className="text-sm text-slate-400">Frisch aus unseren Quellen</p>
-              </div>
-              <Link href="/jobs" className="text-sm font-semibold text-brand-600 hover:text-brand-800 hover:underline">
-                Alle Jobs →
-              </Link>
-            </div>
-            {latestJobs.length === 0 ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
-                <p className="text-2xl">🏃</p>
-                <p className="mt-2 font-medium text-slate-700">Noch keine Stellenangebote vorhanden.</p>
-                <p className="mt-1 text-slate-400">Die Jobs werden täglich automatisch importiert.</p>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-xl border border-white/70" style={{ backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", background: "rgba(255,255,255,0.45)" }}>
-                {latestJobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
-                ))}
-              </div>
-            )}
-          </section>
 
           {/* How it works */}
           <section>
