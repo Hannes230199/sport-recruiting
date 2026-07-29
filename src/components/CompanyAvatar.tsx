@@ -58,49 +58,40 @@ interface CompanyAvatarProps {
 export function CompanyAvatar({ company, companyUrl, icon, dark = false }: CompanyAvatarProps) {
   const [logoLoaded, setLogoLoaded] = useState(false);
 
-  // Only use confirmed scraped URL — never guess, to avoid wrong logos
-  const domain = companyUrl ? extractDomain(companyUrl) : null;
+  // Only use confirmed scraped URL — never guess, to avoid wrong logos.
+  // In dark mode, skip Clearbit entirely: small German sports companies rarely
+  // have high-quality logos there, and the invert filter makes bad ones worse.
+  const domain = !dark && companyUrl ? extractDomain(companyUrl) : null;
 
   return (
     <div className="relative flex h-10 w-10 shrink-0 items-center justify-center">
-      {/* Fallback */}
+      {/* Letter avatar (always rendered as base layer) */}
       {!logoLoaded && (
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${
             dark
-              ? "bg-white/10 text-white/60 text-sm font-bold"
+              ? `${initialColor(company)} opacity-80`
               : icon
               ? "bg-slate-50"
-              : `${initialColor(company)} text-sm font-bold`
+              : initialColor(company)
           }`}
         >
           {icon ?? company.charAt(0).toUpperCase()}
         </div>
       )}
 
-      {/* Logo */}
+      {/* Clearbit logo (light mode only) */}
       {domain && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={`https://logo.clearbit.com/${domain}?size=128`}
+          src={`https://logo.clearbit.com/${domain}`}
           alt={company}
           width={36}
           height={36}
           className={`absolute inset-0 h-10 w-10 object-contain transition-opacity ${
             logoLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
-          } ${
-            dark
-              ? "rounded-lg p-1 opacity-80"
-              : "rounded-lg border border-slate-100 bg-white p-0.5"
-          }`}
-          style={dark ? { filter: "brightness(0) invert(1)" } : undefined}
-          onLoad={(e) => {
-            const img = e.target as HTMLImageElement;
-            // Reject tiny favicons — only accept real logos (≥32px)
-            if (img.naturalWidth >= 32 && img.naturalHeight >= 32) {
-              setLogoLoaded(true);
-            }
-          }}
+          } rounded-lg border border-slate-100 bg-white p-0.5`}
+          onLoad={() => setLogoLoaded(true)}
           onError={() => setLogoLoaded(false)}
         />
       )}
