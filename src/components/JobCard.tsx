@@ -73,7 +73,7 @@ export function JobCard({ job, matchScore, dark = true }: { job: Job; matchScore
       className={`group flex items-center gap-4 border-b px-5 py-4 last:border-0 transition-all ${dark ? "border-white/10 hover:bg-white/10" : "border-slate-100 bg-white hover:bg-slate-50"}`}
     >
       {/* Company logo (best-effort) or sport emoji or initial */}
-      <CompanyAvatar company={companyName} companyUrl={job.companyUrl} icon={icon} />
+      <CompanyAvatar company={companyName} companyUrl={job.companyUrl} icon={icon} dark={dark} />
 
       {/* Main content */}
       <div className="min-w-0 flex-1">

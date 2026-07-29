@@ -50,33 +50,34 @@ function initialColor(name: string): string {
 
 interface CompanyAvatarProps {
   company: string;
-  /** Scraped company website URL (preferred over domain guesser) */
   companyUrl: string | null;
-  /** Sport category emoji (already computed by parent) */
   icon: string | null;
+  dark?: boolean;
 }
 
-export function CompanyAvatar({ company, companyUrl, icon }: CompanyAvatarProps) {
-  // Start hidden — only reveal once onLoad fires. Avoids broken-image flash
-  // when Clearbit fails before React hydration (onError never fires in that case).
+export function CompanyAvatar({ company, companyUrl, icon, dark = false }: CompanyAvatarProps) {
   const [logoLoaded, setLogoLoaded] = useState(false);
 
   const domain = companyUrl ? extractDomain(companyUrl) : guessDomain(company);
 
   return (
     <div className="relative flex h-10 w-10 shrink-0 items-center justify-center">
-      {/* Fallback — always rendered, hidden once logo loads */}
+      {/* Fallback */}
       {!logoLoaded && (
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${
-            icon ? "bg-slate-50" : `${initialColor(company)} text-sm font-bold`
+            dark
+              ? "bg-white/10 text-white/60 text-sm font-bold"
+              : icon
+              ? "bg-slate-50"
+              : `${initialColor(company)} text-sm font-bold`
           }`}
         >
           {icon ?? company.charAt(0).toUpperCase()}
         </div>
       )}
 
-      {/* Logo — preloaded invisibly; shown on success */}
+      {/* Logo */}
       {domain && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -84,9 +85,14 @@ export function CompanyAvatar({ company, companyUrl, icon }: CompanyAvatarProps)
           alt={company}
           width={36}
           height={36}
-          className={`absolute inset-0 h-10 w-10 rounded-lg border border-slate-100 bg-white object-contain p-0.5 transition-opacity ${
+          className={`absolute inset-0 h-10 w-10 object-contain transition-opacity ${
             logoLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
+          } ${
+            dark
+              ? "rounded-lg p-1 opacity-80"
+              : "rounded-lg border border-slate-100 bg-white p-0.5"
           }`}
+          style={dark ? { filter: "brightness(0) invert(1)" } : undefined}
           onLoad={() => setLogoLoaded(true)}
           onError={() => setLogoLoaded(false)}
         />
