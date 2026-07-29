@@ -12,7 +12,7 @@ export default async function HomePage() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="relative w-screen overflow-hidden" style={{ height: "calc(100vh - 57px)", minHeight: 520, maxHeight: 780 }}>
+      <section className="relative w-screen overflow-hidden" style={{ height: "72vh", minHeight: 420, maxHeight: 620 }}>
 
         {/* 1. Pitch photo background */}
         <div
