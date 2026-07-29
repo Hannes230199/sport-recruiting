@@ -99,17 +99,6 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="hidden sm:block">
-                <div className="border-l-2 border-white/32 pl-5">
-                  <p className="text-sm leading-relaxed text-white/82">
-                    Alle Sportjobs Deutschlands — aggregiert aus den besten Quellen, täglich aktualisiert.
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <span className="rounded-full border border-green-400/40 bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-300">● Täglich neu</span>
-                    <span className="rounded-full border border-sky-400/30 bg-sky-400/15 px-3 py-1 text-xs font-semibold text-sky-300">5 Quellen</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Stat cards */}

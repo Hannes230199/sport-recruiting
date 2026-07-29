@@ -35,30 +35,32 @@ export async function Header() {
           </span>
         </Link>
 
-        {/* Nav */}
-        <nav className="flex items-center gap-0.5 text-sm font-medium text-slate-600">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-md px-3 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900"
-            >
-              {item.label}
-            </Link>
-          ))}
-          {showRecruiterLink && (
-            <Link
-              href="/recruiter"
-              className="rounded-md px-3 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900"
-            >
-              Recruiter
-            </Link>
-          )}
+        {/* Nav pill group */}
+        <nav className="flex items-center gap-3">
+          <div className="flex items-center rounded-full border border-slate-200/80 px-1.5 py-1.5 text-sm font-medium text-slate-600" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.6)" }}>
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full px-4 py-1.5 transition-colors hover:bg-white hover:text-slate-900 hover:shadow-sm"
+              >
+                {item.label}
+              </Link>
+            ))}
+            {showRecruiterLink && (
+              <Link
+                href="/recruiter"
+                className="rounded-full px-4 py-1.5 transition-colors hover:bg-white hover:text-slate-900 hover:shadow-sm"
+              >
+                Recruiter
+              </Link>
+            )}
+          </div>
           {user ? (
-            <form action="/auth/signout" method="post" className="ml-2">
+            <form action="/auth/signout" method="post">
               <button
                 type="submit"
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
+                className="rounded-full border border-slate-200 bg-white/70 px-4 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-white"
               >
                 Abmelden
               </button>
@@ -66,7 +68,7 @@ export async function Header() {
           ) : (
             <Link
               href="/login"
-              className="ml-2 rounded-md bg-brand-600 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+              className="rounded-full bg-brand-600 px-5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
             >
               Anmelden
             </Link>
