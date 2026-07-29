@@ -82,7 +82,7 @@ export function CompanyAvatar({ company, companyUrl, icon, dark = false }: Compa
       {domain && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={`https://logo.clearbit.com/${domain}`}
+          src={`https://logo.clearbit.com/${domain}?size=128`}
           alt={company}
           width={36}
           height={36}
@@ -94,7 +94,13 @@ export function CompanyAvatar({ company, companyUrl, icon, dark = false }: Compa
               : "rounded-lg border border-slate-100 bg-white p-0.5"
           }`}
           style={dark ? { filter: "brightness(0) invert(1)" } : undefined}
-          onLoad={() => setLogoLoaded(true)}
+          onLoad={(e) => {
+            const img = e.target as HTMLImageElement;
+            // Reject tiny favicons — only accept real logos (≥32px)
+            if (img.naturalWidth >= 32 && img.naturalHeight >= 32) {
+              setLogoLoaded(true);
+            }
+          }}
           onError={() => setLogoLoaded(false)}
         />
       )}
