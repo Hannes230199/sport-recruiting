@@ -29,7 +29,7 @@ export default async function MeineJobsPage() {
     .order("posted_at", { ascending: false });
 
   return (
-<PageContainer>
+    <PageContainer>
   <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -106,5 +106,6 @@ export default async function MeineJobsPage() {
         Fragen? Schreib uns: <a href="mailto:info@sportrecruiting.de" className="text-brand-600 hover:underline">info@sportrecruiting.de</a>
       </p>
     </div>
+    </PageContainer>
   );
 }

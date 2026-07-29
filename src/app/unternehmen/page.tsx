@@ -24,7 +24,7 @@ export default async function UnternehmenPage() {
     : "/unternehmen/registrieren";
 
   return (
-<PageContainer>
+    <PageContainer>
   <div className="space-y-16">
       {/* Hero */}
       <section className="pt-6">
@@ -120,5 +120,6 @@ export default async function UnternehmenPage() {
         </div>
       </section>
     </div>
+    </PageContainer>
   );
 }

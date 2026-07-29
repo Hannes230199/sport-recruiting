@@ -10,7 +10,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   const { error } = await searchParams;
 
   return (
-<PageContainer>
+    <PageContainer>
   <div className="flex min-h-[60vh] items-center justify-center">
       <div className="w-full max-w-md">
         <div className="h-1.5 w-full rounded-t-2xl bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600" />
@@ -102,5 +102,6 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
         </div>
       </div>
     </div>
+    </PageContainer>
   );
 }

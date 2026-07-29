@@ -26,7 +26,7 @@ export default async function PostJobPage() {
   if (!company) redirect("/unternehmen/registrieren");
 
   return (
-<PageContainer>
+    <PageContainer>
   <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Schritt 2 von 2</p>
@@ -158,5 +158,6 @@ export default async function PostJobPage() {
         </form>
       </div>
     </div>
+    </PageContainer>
   );
 }

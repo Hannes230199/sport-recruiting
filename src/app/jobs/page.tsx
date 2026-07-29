@@ -67,7 +67,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   const hasFilters = q || category || location || employmentType || minScore > 0;
 
   return (
-<PageContainer>
+    <PageContainer>
   <div className="space-y-6">
       {/* Page header */}
       <div className="flex items-baseline justify-between">
@@ -183,5 +183,6 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         </div>
       )}
     </div>
+    </PageContainer>
   );
 }

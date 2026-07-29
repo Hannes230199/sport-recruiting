@@ -15,7 +15,7 @@ export default async function BewerbungenPage() {
   const applications = await getApplications(supabase, user.id);
 
   return (
-<PageContainer>
+    <PageContainer>
   <div className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
@@ -34,5 +34,6 @@ export default async function BewerbungenPage() {
 
       <KanbanBoard initialApplications={applications} />
     </div>
+    </PageContainer>
   );
 }

@@ -42,7 +42,7 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
 
   if (!profile.isRecruiter) {
     return (
-<PageContainer>
+    <PageContainer>
   <div className="mx-auto max-w-md rounded-2xl border border-brand-100 bg-white p-8 text-center shadow-sm">
         <p className="text-3xl">🔒</p>
         <h1 className="mt-3 text-lg font-bold text-slate-900">Kein Zugriff</h1>
@@ -197,5 +197,6 @@ export default async function RecruiterPage({ searchParams }: RecruiterPageProps
         </div>
       )}
     </div>
+    </PageContainer>
   );
 }

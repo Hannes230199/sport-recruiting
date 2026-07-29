@@ -17,7 +17,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
   const userName = (data.user.user_metadata?.full_name as string | undefined) ?? "";
 
   return (
-<PageContainer>
+    <PageContainer>
   <div className="mx-auto max-w-xl py-10">
       <div className="mb-8 text-center">
         <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-2xl text-white">
@@ -33,5 +33,6 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
 
       <OnboardingForm defaultName={userName} error={error} />
     </div>
+    </PageContainer>
   );
 }
