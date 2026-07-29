@@ -48,8 +48,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const posted = formatDate(job.postedAt);
 
   return (
-<PageContainer>
-  <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+<PageContainer>
+  <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
       <article className="rounded-2xl border border-brand-100 bg-white p-8 shadow-sm">
         <Link
           href="/jobs"

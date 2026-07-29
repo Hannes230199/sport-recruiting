@@ -15,8 +15,8 @@ export default async function BewerbungenPage() {
   const applications = await getApplications(supabase, user.id);
 
   return (
-<PageContainer>
-  <div className="space-y-6">
+<PageContainer>
+  <div className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Meine Bewerbungen</h1>

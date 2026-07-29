@@ -42,8 +42,8 @@ export default async function ProfilPage({ searchParams }: ProfilPageProps) {
   const matches = rankJobsForCandidate(allJobs, candidate).filter((m) => m.score > 0);
 
   return (
-<PageContainer>
-  <div className="space-y-8">
+<PageContainer>
+  <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Mein Profil</h1>
         <p className="mt-1 text-sm text-slate-500">

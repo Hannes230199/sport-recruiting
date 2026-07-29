@@ -24,8 +24,8 @@ export default async function UnternehmenPage() {
     : "/unternehmen/registrieren";
 
   return (
-<PageContainer>
-  <div className="space-y-16">
+<PageContainer>
+  <div className="space-y-16">
       {/* Hero */}
       <section className="pt-6">
         <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">

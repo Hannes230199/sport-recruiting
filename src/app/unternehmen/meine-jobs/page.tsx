@@ -29,8 +29,8 @@ export default async function MeineJobsPage() {
     .order("posted_at", { ascending: false });
 
   return (
-<PageContainer>
-  <div className="space-y-6">
+<PageContainer>
+  <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Meine Stellenanzeigen</h1>

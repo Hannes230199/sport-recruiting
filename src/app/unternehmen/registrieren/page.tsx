@@ -17,8 +17,8 @@ export default async function RegisterCompanyPage() {
   if (existing) redirect("/unternehmen/job-posten");
 
   return (
-<PageContainer>
-  <div className="mx-auto max-w-lg">
+<PageContainer>
+  <div className="mx-auto max-w-lg">
       <div className="mb-6">
         <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Schritt 1 von 2</p>
         <h1 className="mt-2 text-2xl font-extrabold text-slate-900">Unternehmen registrieren</h1>
